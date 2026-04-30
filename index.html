@@ -12,68 +12,53 @@
             background: radial-gradient(circle, #0d1b2a 0%, #000814 100%);
             font-family: 'Orbitron', sans-serif;
             color: #ffffff;
-            overflow-x: hidden;
             min-height: 100vh;
         }
-        .card-container {
-            perspective: 1000px;
-            width: 100%;
-            height: 160px;
-        }
+        .card-container { perspective: 1000px; width: 100%; height: 160px; }
         .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        /* Reveal State */
+        /* 180 Degree Flip */
         .card.revealed { transform: rotateY(180deg); }
         
         .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #3b82f6;
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        /* Front Face (Revealed Result) */
+        /* Front Face: အဖြေလှန်ပြတဲ့ပုံ (၁၈၀ လှည့်ထားသည်) */
         .card-front {
             background-image: url('https://i.ibb.co/CKSQMPnm/Screenshot-2026-04-30-14-09-57-530-com-google-android-googlequicksearchbox-edit.jpg');
-            background-size: cover;
-            background-position: center;
+            background-size: cover; background-position: center;
             transform: rotateY(180deg);
         }
-        /* Back Face (Hidden/Shaking) */
+        /* Back Face: ဖဲမှောက်ထားတဲ့ပုံ */
         .card-back {
             background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg');
-            background-size: cover;
-            background-position: center;
+            background-size: cover; background-position: center;
+            border: 2px solid #3b82f6;
         }
         
-        .result-val { font-size: 2.5rem; font-weight: 800; color: #fbbf24; text-shadow: 2px 2px 10px #000; }
+        .result-val { font-size: 2.8rem; font-weight: 800; color: #fbbf24; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); }
         
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            30% { transform: translate(-3px, 0px) rotate(1deg); }
-            50% { transform: translate(3px, 2px) rotate(0deg); }
+            30% { transform: translate(-2px, 0px) rotate(1deg); }
+            50% { transform: translate(2px, 1px) rotate(0deg); }
             70% { transform: translate(1px, -1px) rotate(1deg); }
-            90% { transform: translate(-1px, 2px) rotate(-1deg); }
+            100% { transform: translate(-1px, 2px) rotate(-1deg); }
         }
-        .shaking { animation: shake 0.3s infinite; }
-        .selected-border { border: 3px solid #fbbf24 !important; box-shadow: 0 0 15px #fbbf24; }
+        .shaking { animation: shake 0.4s infinite; }
+        .selected-card { border: 4px solid #fbbf24 !important; box-shadow: 0 0 20px #fbbf24; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="p-4">
 
-    <audio id="gameMusic" preload="auto">
+    <audio id="gameMusic" crossorigin="anonymous">
         <source src="https://github.com/ggg121314/Golden-Game-Global-/raw/refs/heads/main/sonican-powerful-epic-orchestral-45-seconds-330378.mp3" type="audio/mpeg">
     </audio>
 
@@ -83,12 +68,12 @@
     </div>
 
     <div class="max-w-md mx-auto">
-        <div class="grid grid-cols-2 gap-4 mb-6 text-center">
-            <div class="glass p-3 rounded-xl">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="glass p-3 rounded-xl text-center">
                 <p class="text-[10px] text-gray-400">PENDING</p>
                 <p class="text-lg font-bold text-green-500" id="pending-win">0.00 TON</p>
             </div>
-            <div class="glass p-3 rounded-xl">
+            <div class="glass p-3 rounded-xl text-center">
                 <p class="text-[10px] text-gray-400">REFERRAL</p>
                 <p class="text-lg font-bold text-yellow-500" id="ref-balance">0.00 TON</p>
             </div>
@@ -121,18 +106,18 @@
             </div>
         </div>
 
-        <div class="glass p-6 rounded-2xl shadow-2xl">
+        <div class="glass p-6 rounded-2xl">
             <div class="flex justify-between mb-2">
-                <span class="text-sm font-semibold">Bet Amount</span>
+                <span class="text-sm">Bet Amount</span>
                 <span class="text-sm font-bold text-blue-400" id="betDisplay">0.1 TON</span>
             </div>
-            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
+            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-6" id="betRange" oninput="updateBet(this.value)">
             
             <div id="timerDisplay" class="text-center text-yellow-500 font-bold mb-4 hidden">
-                Next Reveal in: <span id="seconds" class="text-2xl">45</span>s
+                Reveal in: <span id="seconds" class="text-2xl">45</span>s
             </div>
 
-            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg transition-transform active:scale-95" onclick="startBetProcess()">
+            <button id="betBtn" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-all" onclick="handlePlaceBet()">
                 PLACE BET (3.3x)
             </button>
         </div>
@@ -140,83 +125,71 @@
 
     <script>
         let selected = 0;
-        const music = document.getElementById('gameMusic');
         let isProcessing = false;
+        const music = document.getElementById('gameMusic');
 
         function selectCard(n) {
             if(isProcessing) return;
             selected = n;
-            // UI Update: Highlight back face border
-            document.querySelectorAll('.card-back').forEach(b => b.classList.remove('selected-border'));
-            document.getElementById('back'+n).classList.add('selected-border');
+            document.querySelectorAll('.card-back').forEach(b => b.classList.remove('selected-card'));
+            document.getElementById('back'+n).classList.add('selected-card');
         }
 
         function updateBet(v) { document.getElementById('betDisplay').innerText = v + " TON"; }
 
-        function startBetProcess() {
-            if(selected === 0) return alert("Please select a card first!");
+        function handlePlaceBet() {
+            if(selected === 0) return alert("Select a Card First!");
             if(isProcessing) return;
 
             isProcessing = true;
-            document.getElementById('betBtn').disabled = true;
-            document.getElementById('betBtn').innerText = "GAME IN PROGRESS...";
+            const btn = document.getElementById('betBtn');
+            btn.disabled = true;
+            btn.innerText = "GAME IN PROGRESS...";
 
-            // 1. Play Music (Interaction happens here so it's allowed)
+            // MUSIC & SHAKING START
             music.currentTime = 0;
-            music.play().catch(e => console.log("Audio play failed:", e));
+            music.play().then(() => { console.log("Music started"); })
+                 .catch(e => { console.error("Audio failed:", e); });
 
-            // 2. Start Shaking
             document.querySelectorAll('.card').forEach(c => {
-                c.classList.remove('revealed'); // Ensure they are face down
+                c.classList.remove('revealed');
                 c.classList.add('shaking');
             });
 
-            // 3. Timer Logic (45s)
             document.getElementById('timerDisplay').classList.remove('hidden');
+            
             let timeLeft = 45;
-            let countdown = setInterval(() => {
+            const countdown = setInterval(() => {
                 timeLeft--;
                 document.getElementById('seconds').innerText = timeLeft;
                 if(timeLeft <= 0) {
                     clearInterval(countdown);
-                    revealResults();
+                    revealAll();
                 }
             }, 1000);
         }
 
-        function revealResults() {
-            // 4. Stop Shaking & Music
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('shaking'));
+        function revealAll() {
             music.pause();
+            document.querySelectorAll('.card').forEach(c => {
+                c.classList.remove('shaking');
+                c.classList.add('revealed'); // This triggers the 180 flip
+            });
 
-            // 5. Simulate Contract Results (Logic to be linked to Contract later)
-            const mockResults = [
-                Math.floor(Math.random() * 13) + 1,
-                Math.floor(Math.random() * 13) + 1,
-                Math.floor(Math.random() * 13) + 1,
-                Math.floor(Math.random() * 13) + 1
-            ];
+            // Mock values (Will replace with Contract Data)
+            const results = [7, 9, 5, 7]; 
+            results.forEach((val, i) => {
+                document.getElementById('res' + (i+1)).innerText = val;
+            });
 
-            // Assign values to front faces
-            document.getElementById('res1').innerText = mockResults[0];
-            document.getElementById('res2').innerText = mockResults[1];
-            document.getElementById('res3').innerText = mockResults[2];
-            document.getElementById('res4').innerText = mockResults[3];
-
-            // 6. Flip All Cards to Reveal
-            document.querySelectorAll('.card').forEach(c => c.classList.add('revealed'));
-
-            // Reset Game State after delay
             setTimeout(() => {
                 isProcessing = false;
                 document.getElementById('betBtn').disabled = false;
                 document.getElementById('betBtn').innerText = "PLACE BET (3.3x)";
                 document.getElementById('timerDisplay').classList.add('hidden');
-                document.getElementById('seconds').innerText = "45";
             }, 5000);
         }
 
-        // Initialize TonConnect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
@@ -224,4 +197,3 @@
     </script>
 </body>
 </html>
-
