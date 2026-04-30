@@ -1,1 +1,155 @@
-HTML 
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGG QUAD-CARD LEGACY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        body {
+            background: radial-gradient(circle, #0d1b2a 0%, #000814 100%);
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .card-slot {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .card-inner {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+        .card-slot.selected .card-inner {
+            border-color: #fbbf24;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+            transform: translateY(-10px);
+        }
+        .card-val { font-size: 2rem; font-weight: bold; }
+        .neon-text { text-shadow: 0 0 10px #3b82f6; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-xl font-bold text-blue-400 neon-text">GGG QUAD-CARD</h1>
+            <p class="text-xs text-gray-400">LEGACY EDITION</p>
+        </div>
+        <div id="ton-connect"></div> </div>
+
+    <div class="max-w-md mx-auto">
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="glass-panel p-3 rounded-xl text-center">
+                <p class="text-xs text-gray-400">သင်၏လက်ကျန်</p>
+                <p class="text-lg font-bold text-yellow-500" id="user-balance">0.00 TON</p>
+            </div>
+            <div class="glass-panel p-3 rounded-xl text-center">
+                <p class="text-xs text-gray-400">နိုင်ကြေး (Pending)</p>
+                <p class="text-lg font-bold text-green-500" id="pending-win">0.00 TON</p>
+            </div>
+        </div>
+
+        <h2 class="text-center mb-4 text-sm text-blue-300">ကတ်တစ်ကတ် ရွေးချယ်ပါ</h2>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="card-slot" onclick="selectCard(1)" id="slot-1">
+                <div class="card-inner">
+                    <span class="text-xs text-gray-500 mb-2">CARD</span>
+                    <span class="card-val">1</span>
+                </div>
+            </div>
+            <div class="card-slot" onclick="selectCard(2)" id="slot-2">
+                <div class="card-inner">
+                    <span class="text-xs text-gray-500 mb-2">CARD</span>
+                    <span class="card-val">2</span>
+                </div>
+            </div>
+            <div class="card-slot" onclick="selectCard(3)" id="slot-3">
+                <div class="card-inner">
+                    <span class="text-xs text-gray-500 mb-2">CARD</span>
+                    <span class="card-val">3</span>
+                </div>
+            </div>
+            <div class="card-slot" onclick="selectCard(4)" id="slot-4">
+                <div class="card-inner">
+                    <span class="text-xs text-gray-500 mb-2">CARD</span>
+                    <span class="card-val">4</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-2xl mb-8">
+            <div class="flex justify-between mb-4">
+                <span class="text-sm">လောင်းကြေး ပမာဏ</span>
+                <span class="text-sm font-bold text-blue-400" id="bet-display">0.1 TON</span>
+            </div>
+            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" 
+                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                   id="bet-range" oninput="updateBet(this.value)">
+            
+            <div class="grid grid-cols-3 gap-2 mt-4">
+                <button onclick="quickBet(0.1)" class="bg-gray-800 py-1 rounded text-xs">MIN</button>
+                <button onclick="quickBet(1.5)" class="bg-gray-800 py-1 rounded text-xs">HALF</button>
+                <button onclick="quickBet(3.1)" class="bg-gray-800 py-1 rounded text-xs">MAX</button>
+            </div>
+
+            <button class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95"
+                    onclick="placeBet()">
+                PLACE BET (3.3x)
+            </button>
+        </div>
+
+        <div class="text-center text-[10px] text-gray-500">
+            <p>Contract: <span class="text-gray-400">EQBL...-f1U</span></p>
+            <p class="mt-1">Provably Fair System • Mode 128 Activated</p>
+        </div>
+
+    </div>
+
+    <script>
+        let selectedSlot = 0;
+        let betAmount = 0.1;
+
+        function selectCard(num) {
+            selectedSlot = num;
+            // UI Update
+            document.querySelectorAll('.card-slot').forEach(s => s.classList.remove('selected'));
+            document.getElementById(`slot-${num}`).classList.add('selected');
+        }
+
+        function updateBet(val) {
+            betAmount = parseFloat(val).toFixed(1);
+            document.getElementById('bet-display').innerText = betAmount + " TON";
+        }
+
+        function quickBet(val) {
+            document.getElementById('bet-range').value = val;
+            updateBet(val);
+        }
+
+        function placeBet() {
+            if(selectedSlot === 0) {
+                alert("ကျေးဇူးပြု၍ ကတ်တစ်ကတ် အရင်ရွေးချယ်ပါ။");
+                return;
+            }
+            alert(`လောင်းကြေး: ${betAmount} TON | ရွေးချယ်သောကတ်: ${selectedSlot}\nဆက်လက်ဆောင်ရွက်ရန် Wallet ချိတ်ဆက်ပါ...`);
+        }
+    </script>
+</body>
+</html>
