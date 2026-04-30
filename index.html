@@ -1,155 +1,186 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GGG QUAD-CARD LEGACY</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
         body {
             background: radial-gradient(circle, #0d1b2a 0%, #000814 100%);
             font-family: 'Orbitron', sans-serif;
             color: #ffffff;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .card-slot {
-            perspective: 1000px;
+        .card {
+            width: 100%;
+            height: 160px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
-        .card-inner {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border: 2px solid #3b82f6;
-            border-radius: 15px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            height: 150px;
+        /* Card Flipping Classes */
+        .card.is-flipped { transform: rotateY(180deg); }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            font-size: 2rem;
+            font-weight: bold;
+            border: 2px solid #3b82f6;
         }
-        .card-slot.selected .card-inner {
-            border-color: #fbbf24;
-            box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
-            transform: translateY(-10px);
+        /* Front Face (Revealed Card) */
+        .card-front {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            color: #fbbf24;
+            transform: rotateY(180deg);
+            background-image: url('https://i.ibb.co/CKSQMPnm/Screenshot-2026-04-30-14-09-57-530-com-google-android-googlequicksearchbox-edit.jpg');
+            background-size: cover;
+            background-position: center;
         }
-        .card-val { font-size: 2rem; font-weight: bold; }
-        .neon-text { text-shadow: 0 0 10px #3b82f6; }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Back Face (Hidden Card) */
+        .card-back {
+            background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg');
+            background-size: cover;
+            background-position: center;
         }
+        
+        /* Shaking Animation for 45s */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-1px, -2px) rotate(-1deg); }
+            40% { transform: translate(-3px, 0px) rotate(1deg); }
+            60% { transform: translate(3px, 2px) rotate(0deg); }
+            80% { transform: translate(1px, -1px) rotate(1deg); }
+            100% { transform: translate(-1px, 2px) rotate(-1deg); }
+        }
+        .shaking { animation: shake 0.5s infinite; }
+
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="p-4">
 
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-xl font-bold text-blue-400 neon-text">GGG QUAD-CARD</h1>
-            <p class="text-xs text-gray-400">LEGACY EDITION</p>
-        </div>
-        <div id="ton-connect"></div> </div>
+    <audio id="gameMusic" src="https://github.com/ggg121314/Golden-Game-Global-/raw/refs/heads/main/sonican-powerful-epic-orchestral-45-seconds-330378.mp3"></audio>
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold text-blue-400">GGG QUAD-CARD</h1>
+        <div id="ton-connect"></div>
+    </div>
 
     <div class="max-w-md mx-auto">
-        
         <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="glass-panel p-3 rounded-xl text-center">
-                <p class="text-xs text-gray-400">သင်၏လက်ကျန်</p>
-                <p class="text-lg font-bold text-yellow-500" id="user-balance">0.00 TON</p>
-            </div>
-            <div class="glass-panel p-3 rounded-xl text-center">
-                <p class="text-xs text-gray-400">နိုင်ကြေး (Pending)</p>
+            <div class="glass p-3 rounded-xl text-center">
+                <p class="text-[10px] text-gray-400">PENDING</p>
                 <p class="text-lg font-bold text-green-500" id="pending-win">0.00 TON</p>
             </div>
-        </div>
-
-        <h2 class="text-center mb-4 text-sm text-blue-300">ကတ်တစ်ကတ် ရွေးချယ်ပါ</h2>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="card-slot" onclick="selectCard(1)" id="slot-1">
-                <div class="card-inner">
-                    <span class="text-xs text-gray-500 mb-2">CARD</span>
-                    <span class="card-val">1</span>
-                </div>
-            </div>
-            <div class="card-slot" onclick="selectCard(2)" id="slot-2">
-                <div class="card-inner">
-                    <span class="text-xs text-gray-500 mb-2">CARD</span>
-                    <span class="card-val">2</span>
-                </div>
-            </div>
-            <div class="card-slot" onclick="selectCard(3)" id="slot-3">
-                <div class="card-inner">
-                    <span class="text-xs text-gray-500 mb-2">CARD</span>
-                    <span class="card-val">3</span>
-                </div>
-            </div>
-            <div class="card-slot" onclick="selectCard(4)" id="slot-4">
-                <div class="card-inner">
-                    <span class="text-xs text-gray-500 mb-2">CARD</span>
-                    <span class="card-val">4</span>
-                </div>
+            <div class="glass p-3 rounded-xl text-center">
+                <p class="text-[10px] text-gray-400">REFERRAL</p>
+                <p class="text-lg font-bold text-yellow-500" id="ref-balance">0.00 TON</p>
             </div>
         </div>
 
-        <div class="glass-panel p-6 rounded-2xl mb-8">
-            <div class="flex justify-between mb-4">
-                <span class="text-sm">လောင်းကြေး ပမာဏ</span>
-                <span class="text-sm font-bold text-blue-400" id="bet-display">0.1 TON</span>
+        <div class="grid grid-cols-2 gap-4 mb-8" id="cardContainer">
+            <div class="card" id="card1" onclick="selectCard(1)">
+                <div class="card-face card-front" id="val1">?</div>
+                <div class="card-face card-back"></div>
             </div>
-            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" 
-                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                   id="bet-range" oninput="updateBet(this.value)">
+            <div class="card" id="card2" onclick="selectCard(2)">
+                <div class="card-face card-front" id="val2">?</div>
+                <div class="card-face card-back"></div>
+            </div>
+            <div class="card" id="card3" onclick="selectCard(3)">
+                <div class="card-face card-front" id="val3">?</div>
+                <div class="card-face card-back"></div>
+            </div>
+            <div class="card" id="card4" onclick="selectCard(4)">
+                <div class="card-face card-front" id="val4">?</div>
+                <div class="card-face card-back"></div>
+            </div>
+        </div>
+
+        <div class="glass p-6 rounded-2xl">
+            <div class="flex justify-between mb-2">
+                <span class="text-sm">Bet Amount</span>
+                <span class="text-sm font-bold text-blue-400" id="betDisplay">0.1 TON</span>
+            </div>
+            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-4" id="betRange" oninput="updateBet(this.value)">
             
-            <div class="grid grid-cols-3 gap-2 mt-4">
-                <button onclick="quickBet(0.1)" class="bg-gray-800 py-1 rounded text-xs">MIN</button>
-                <button onclick="quickBet(1.5)" class="bg-gray-800 py-1 rounded text-xs">HALF</button>
-                <button onclick="quickBet(3.1)" class="bg-gray-800 py-1 rounded text-xs">MAX</button>
-            </div>
+            <div id="timerDisplay" class="text-center text-yellow-500 font-bold mb-4 hidden">Next Reveal in: <span id="seconds">45</span>s</div>
 
-            <button class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95"
-                    onclick="placeBet()">
-                PLACE BET (3.3x)
-            </button>
+            <button id="betBtn" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg" onclick="startBetProcess()">PLACE BET (3.3x)</button>
         </div>
-
-        <div class="text-center text-[10px] text-gray-500">
-            <p>Contract: <span class="text-gray-400">EQBL...-f1U</span></p>
-            <p class="mt-1">Provably Fair System • Mode 128 Activated</p>
-        </div>
-
     </div>
 
     <script>
-        let selectedSlot = 0;
-        let betAmount = 0.1;
+        let selected = 0;
+        const music = document.getElementById('gameMusic');
 
-        function selectCard(num) {
-            selectedSlot = num;
-            // UI Update
-            document.querySelectorAll('.card-slot').forEach(s => s.classList.remove('selected'));
-            document.getElementById(`slot-${num}`).classList.add('selected');
+        function selectCard(n) {
+            selected = n;
+            document.querySelectorAll('.card').forEach(c => c.style.border = "none");
+            document.getElementById('card'+n).style.border = "2px solid #fbbf24";
         }
 
-        function updateBet(val) {
-            betAmount = parseFloat(val).toFixed(1);
-            document.getElementById('bet-display').innerText = betAmount + " TON";
+        function updateBet(v) { document.getElementById('betDisplay').innerText = v + " TON"; }
+
+        function startBetProcess() {
+            if(selected === 0) return alert("Select a Card!");
+
+            // 1. Flip all cards back (မှောက်လိုက်မယ်)
+            document.querySelectorAll('.card').forEach(c => {
+                c.classList.add('is-flipped');
+                c.classList.add('shaking'); // 2. Start shaking
+            });
+
+            // 3. Play Music
+            music.play();
+
+            // 4. Timer Logic (45s)
+            document.getElementById('timerDisplay').classList.remove('hidden');
+            let timeLeft = 45;
+            let countdown = setInterval(() => {
+                timeLeft--;
+                document.getElementById('seconds').innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(countdown);
+                    revealResults();
+                }
+            }, 1000);
         }
 
-        function quickBet(val) {
-            document.getElementById('bet-range').value = val;
-            updateBet(val);
+        function revealResults() {
+            // 5. Stop Shaking & Music
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('shaking'));
+            music.pause();
+            music.currentTime = 0;
+
+            // 6. Flip to Front (လှန်လိုက်မယ်)
+            // ဒီနေရာမှာ Contract ကလာတဲ့ result တွေကို ထည့်ရပါမယ်
+            // ဥပမာ - Card 1 = 12, Card 2 = 5, etc.
+            document.getElementById('val1').innerText = "12";
+            document.getElementById('val2').innerText = "5";
+            document.getElementById('val3').innerText = "8";
+            document.getElementById('val4').innerText = "2";
+
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('is-flipped'));
+            document.getElementById('timerDisplay').classList.add('hidden');
         }
 
-        function placeBet() {
-            if(selectedSlot === 0) {
-                alert("ကျေးဇူးပြု၍ ကတ်တစ်ကတ် အရင်ရွေးချယ်ပါ။");
-                return;
-            }
-            alert(`လောင်းကြေး: ${betAmount} TON | ရွေးချယ်သောကတ်: ${selectedSlot}\nဆက်လက်ဆောင်ရွက်ရန် Wallet ချိတ်ဆက်ပါ...`);
-        }
+        // Initialize TonConnect
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
     </script>
 </body>
 </html>
