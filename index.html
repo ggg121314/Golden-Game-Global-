@@ -1,67 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGG QUAD-CARD LEGACY</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
+        /* ယခင် CSS တွေ အကုန်ထားပါ */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-        body {
-            background: radial-gradient(circle, #0d1b2a 0%, #000814 100%);
-            font-family: 'Orbitron', sans-serif;
-            color: #ffffff;
-            min-height: 100vh;
-            user-select: none;
-        }
-
+        body { background: radial-gradient(circle, #0d1b2a 0%, #000814 100%); font-family: 'Orbitron', sans-serif; color: #ffffff; min-height: 100vh; user-select: none; }
         .card-container { perspective: 1000px; width: 100%; height: 160px; cursor: pointer; }
-        .card {
-            width: 100%; height: 100%; position: relative;
-            transform-style: preserve-3d;
-            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card.revealed { transform: rotateY(180deg); }
-        
-        .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .card-front {
-            background-color: #f8fafc;
-            transform: rotateY(180deg);
-            background-image: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
-        }
-
-        .card-back {
-            background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg');
-            background-size: cover; background-position: center;
-        }
-        
-        .selected-card { 
-            border: 4px solid #22c55e !important; 
-            box-shadow: 0 0 25px rgba(34, 197, 94, 0.9), inset 0 0 10px rgba(34, 197, 94, 0.5);
-            z-index: 50;
-        }
-        
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(59, 130, 246, 0.3); transition: all 0.3s ease; }
+        .card-front { background-color: #f8fafc; transform: rotateY(180deg); background-image: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%); }
+        .card-back { background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg'); background-size: cover; background-position: center; }
+        .selected-card { border: 4px solid #22c55e !important; box-shadow: 0 0 25px rgba(34, 197, 94, 0.9), inset 0 0 10px rgba(34, 197, 94, 0.5); z-index: 50; }
         .result-val { font-size: 3.5rem; font-weight: 900; color: #fbbf24; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0.5deg); }
-            50% { transform: translate(-1px, -1px) rotate(-0.5deg); }
-            100% { transform: translate(1px, 1px) rotate(0.5deg); }
-        }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0.5deg); } 50% { transform: translate(-1px, -1px) rotate(-0.5deg); } 100% { transform: translate(1px, 1px) rotate(0.5deg); } }
         .shaking { animation: shake 0.15s infinite; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* အသံဖွင့်ခလုတ်အတွက် အသစ်ထည့်ထားသော CSS */
+        #soundOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .start-audio-btn { background: #3b82f6; color: white; padding: 20px 40px; border-radius: 50px; font-weight: bold; font-size: 20px; cursor: pointer; border: none; box-shadow: 0 0 20px #3b82f6; }
     </style>
 </head>
 <body class="p-4">
+
+    <div id="soundOverlay">
+        <h2 class="text-xl mb-6 text-blue-400">WELCOME TO GGG</h2>
+        <button class="start-audio-btn" onclick="enableAudio()">🔊 ENTER WITH SOUND</button>
+        <p class="mt-4 text-gray-500 text-sm">(Please tap to enable game audio)</p>
+    </div>
 
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-xl font-bold text-blue-400">GGG QUAD-CARD</h1>
@@ -81,57 +48,37 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="card-container" onclick="selectCard(1)">
-                <div class="card" id="card1">
-                    <div class="card-face card-back" id="back1"></div>
-                    <div class="card-face card-front" id="front1"><span class="result-val" id="res1">?</span></div>
-                </div>
-            </div>
-            <div class="card-container" onclick="selectCard(2)">
-                <div class="card" id="card2">
-                    <div class="card-face card-back" id="back2"></div>
-                    <div class="card-face card-front" id="front2"><span class="result-val" id="res2">?</span></div>
-                </div>
-            </div>
-            <div class="card-container" onclick="selectCard(3)">
-                <div class="card" id="card3">
-                    <div class="card-face card-back" id="back3"></div>
-                    <div class="card-face card-front" id="front3"><span class="result-val" id="res3">?</span></div>
-                </div>
-            </div>
-            <div class="card-container" onclick="selectCard(4)">
-                <div class="card" id="card4">
-                    <div class="card-face card-back" id="back4"></div>
-                    <div class="card-face card-front" id="front4"><span class="result-val" id="res4">?</span></div>
-                </div>
-            </div>
+            <div class="card-container" onclick="selectCard(1)"><div class="card" id="card1"><div class="card-face card-back" id="back1"></div><div class="card-face card-front" id="front1"><span class="result-val" id="res1">?</span></div></div></div>
+            <div class="card-container" onclick="selectCard(2)"><div class="card" id="card2"><div class="card-face card-back" id="back2"></div><div class="card-face card-front" id="front2"><span class="result-val" id="res2">?</span></div></div></div>
+            <div class="card-container" onclick="selectCard(3)"><div class="card" id="card3"><div class="card-face card-back" id="back3"></div><div class="card-face card-front" id="front3"><span class="result-val" id="res3">?</span></div></div></div>
+            <div class="card-container" onclick="selectCard(4)"><div class="card" id="card4"><div class="card-face card-back" id="back4"></div><div class="card-face card-front" id="front4"><span class="result-val" id="res4">?</span></div></div></div>
         </div>
 
         <div class="glass p-6 rounded-2xl shadow-xl">
-            <div class="flex justify-between mb-2">
-                <span class="text-sm font-bold text-gray-400">BET AMOUNT</span>
-                <span class="text-sm font-bold text-blue-400" id="betDisplay">0.1 TON</span>
-            </div>
+            <div class="flex justify-between mb-2"><span class="text-sm font-bold text-gray-400">BET AMOUNT</span><span class="text-sm font-bold text-blue-400" id="betDisplay">0.1 TON</span></div>
             <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
-            
-            <div id="timerDisplay" class="text-center text-yellow-500 font-bold mb-4 hidden">
-                REVEALING IN: <span id="seconds" class="text-3xl">45</span>s
-            </div>
-
-            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50" onclick="handlePlay()">
-                PLACE BET (3.3x)
-            </button>
+            <div id="timerDisplay" class="text-center text-yellow-500 font-bold mb-4 hidden">REVEALING IN: <span id="seconds" class="text-3xl">45</span>s</div>
+            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50" onclick="handlePlay()">PLACE BET (3.3x)</button>
         </div>
     </div>
 
     <script>
         let selected = 0;
         let isGameState = "IDLE";
+        
+        // Audio Object ကို အပြင်မှာ ကြေညာမယ်
+        const gameAudio = new Audio("https://mcjkstdplhybfjjjtzyl.supabase.co/storage/v1/object/public/audio/sonican-powerful-epic-orchestral-45-seconds-330378.mp3");
 
-        // ✅ အသံဖိုင်ကို စောစောစီးစီး Load လုပ်ထားမယ်
-        const gameAudio = new Audio("https://raw.githubusercontent.com/ggg121314/Golden-Game-Global-/main/sonican-powerful-epic-orchestral-45-seconds-330378.mp3");
-        gameAudio.preload = "auto";
-        gameAudio.load();
+        // ✅ အသံကို Enable လုပ်မည့် Function
+        function enableAudio() {
+            gameAudio.play().then(() => {
+                gameAudio.pause(); // Browser ကို အသံခွင့်ပြုချက် ရယူလိုက်တာပါ
+                gameAudio.currentTime = 0;
+                document.getElementById('soundOverlay').style.display = 'none';
+            }).catch(e => {
+                alert("Please tap the button again to enable sound!");
+            });
+        }
 
         function selectCard(n) {
             if(isGameState === "BETTING") return;
@@ -143,19 +90,25 @@
 
         function updateBet(v) { document.getElementById('betDisplay').innerText = v + " TON"; }
 
-        function handlePlay() {
+        // ✅ Click Event ထဲမှာ Async/Await နဲ့ အသံကို သေချာအောင် ဖွင့်မယ်
+        async function handlePlay() {
             if(selected === 0) return alert("Please select a card first!");
             if(isGameState === "BETTING") return;
+
+            try {
+                gameAudio.currentTime = 0;
+                await gameAudio.play(); // Click event ထဲမှာ တိုက်ရိုက်ခေါ်ခြင်း
+                console.log("Audio is playing...");
+            } catch(e) {
+                console.log("Audio play failed:", e);
+                alert("Please enable sound first!");
+                return;
+            }
 
             isGameState = "BETTING";
             const btn = document.getElementById('betBtn');
             btn.disabled = true;
             btn.innerText = "GAME STARTED";
-
-            // ✅ အရေးကြီးဆုံးအချက် - ခလုတ်နှိပ်လိုက်တာနဲ့ ချက်ချင်း ဖွင့်မယ် (await မပါရ)
-            gameAudio.currentTime = 0;
-            gameAudio.play().catch(e => console.log("Play failed:", e));
-
             startGame();
         }
 
@@ -164,7 +117,6 @@
                 c.classList.remove('revealed');
                 c.classList.add('shaking');
             });
-
             document.getElementById('timerDisplay').classList.remove('hidden');
             let timer = 45;
             const countdown = setInterval(() => {
@@ -184,10 +136,8 @@
                 c.classList.remove('shaking');
                 c.classList.add('revealed');
             });
-
             const mock = [7, 12, 1, 9];
             mock.forEach((v, i) => document.getElementById('res' + (i+1)).innerText = v);
-
             setTimeout(() => {
                 const btn = document.getElementById('betBtn');
                 btn.disabled = false;
