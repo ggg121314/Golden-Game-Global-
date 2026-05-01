@@ -3,190 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGG QUAD-CARD ELITE</title>
+    <title>GGG QUAD-CARD LEGACY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
         body {
-            background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%);
-            font-family: 'Rajdhani', sans-serif;
+            background: radial-gradient(circle, #0d1b2a 0%, #000814 100%);
+            font-family: 'Orbitron', sans-serif;
             color: #ffffff;
             min-height: 100vh;
-            overflow-x: hidden;
+            padding: 10px;
         }
 
-        .orbitron { font-family: 'Orbitron', sans-serif; }
-
-        /* Sound Overlay */
-        #soundOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Card Styling - Vertical Focus */
-        .card-container { perspective: 1000px; width: 100%; height: 120px; margin-bottom: 12px; }
+        /* Card Styling - ဖဲချပ်ပုံစံ */
+        .card-container { perspective: 1000px; width: 100%; height: 180px; position: relative; }
         .card {
             width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .card.revealed { transform: rotateX(180deg); }
-        
+        .card.revealed { transform: rotateY(180deg); }
         .card-face {
             position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 15px;
+            backface-visibility: hidden; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .card-front {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            transform: rotateX(180deg);
-        }
-
+        .card-front { background: white; color: #1e293b; transform: rotateY(180deg); }
         .card-back {
-            background: linear-gradient(45deg, #1e3a8a, #3b82f6);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-            border: 2px solid rgba(59, 130, 246, 0.5);
+            background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg');
+            background-size: cover; border: 2px solid #3b82f6;
+        }
+        .selected-card { border: 4px solid #22c55e !important; box-shadow: 0 0 20px #22c55e; }
+
+        /* Sound Overlay over Cards */
+        #audio-locker {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 100; border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
         }
 
-        .card-back::after {
-            content: "GGG"; font-family: 'Orbitron'; font-size: 1.5rem; font-weight: bold; opacity: 0.3;
-        }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-withdraw { background: #2563eb; color: white; font-size: 10px; padding: 4px 8px; border-radius: 5px; }
         
-        .selected-card { 
-            border: 3px solid #22c55e !important; 
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
-            transform: scale(1.02);
-        }
-
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-        .active-win { animation: pulse-green 2s infinite; }
+        /* Table Styling */
+        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        th, td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <div id="soundOverlay">
-        <div class="text-center animate-bounce mb-8">
-            <h1 class="orbitron text-4xl font-bold text-blue-500 tracking-tighter">GGG</h1>
-            <p class="text-blue-300 tracking-[0.3em] text-xs">QUAD-CARD LEGACY</p>
-        </div>
-        <button onclick="enableAudio()" class="orbitron bg-blue-600 hover:bg-blue-500 px-10 py-5 rounded-full font-bold text-xl shadow-[0_0_30px_#2563eb] transition-all active:scale-90">
-            ENTER GAME
-        </button>
-        <p class="mt-6 text-gray-500 text-sm italic">Tap to sync audio & assets</p>
-    </div>
-
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="orbitron text-xl font-bold text-blue-400">GGG QUAD-CARD</h1>
-            <p class="text-[10px] text-gray-500">PROVABLY FAIR GAMING</p>
-        </div>
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-lg font-bold text-blue-400">GGG QUAD-CARD</h1>
         <div id="ton-connect"></div>
     </div>
 
     <div class="max-w-md mx-auto">
-        <div class="grid grid-cols-1 gap-4 mb-6">
-            <div class="glass p-4 rounded-2xl flex justify-between items-center active-win">
-                <div>
-                    <p class="text-xs text-gray-400 font-bold uppercase">Pending Wins</p>
-                    <p class="text-2xl font-bold text-green-400 orbitron" id="pending-win">0.00 TON</p>
-                </div>
-                <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-bold transition-colors">WITHDRAW</button>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="glass p-3 rounded-xl border-green-500/50 border">
+                <p class="text-[10px] text-green-400 font-bold uppercase">Pending Wins</p>
+                <p class="text-md font-bold text-white mb-2" id="pending-win">0.00 TON</p>
+                <button class="btn-withdraw">WITHDRAW</button>
             </div>
-
-            <div class="glass p-4 rounded-2xl flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-gray-400 font-bold uppercase">Referral Rewards</p>
-                    <p class="text-2xl font-bold text-green-400 orbitron" id="ref-balance">0.00 TON</p>
-                </div>
-                <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-bold transition-colors">WITHDRAW</button>
+            <div class="glass p-3 rounded-xl border-green-500/50 border">
+                <p class="text-[10px] text-green-400 font-bold uppercase">Referral</p>
+                <p class="text-md font-bold text-white mb-2" id="ref-balance">0.00 TON</p>
+                <button class="btn-withdraw">WITHDRAW</button>
             </div>
         </div>
 
-        <div class="mb-6" id="cardGrid">
-            <div class="card-container" onclick="selectCard(1)">
-                <div class="card" id="card1">
-                    <div class="card-face card-back" id="back1"></div>
-                    <div class="card-face card-front orbitron text-4xl text-yellow-500 font-black" id="res1">?</div>
-                </div>
+        <div class="relative">
+            <div id="audio-locker">
+                <button onclick="enableAudio()" class="bg-blue-600 px-6 py-3 rounded-full font-bold shadow-lg animate-bounce">
+                    🔊 ENTER WITH SONG
+                </button>
             </div>
-            <div class="card-container" onclick="selectCard(2)">
-                <div class="card" id="card2">
-                    <div class="card-face card-back" id="back2"></div>
-                    <div class="card-face card-front orbitron text-4xl text-yellow-500 font-black" id="res2">?</div>
-                </div>
-            </div>
-            <div class="card-container" onclick="selectCard(3)">
-                <div class="card" id="card3">
-                    <div class="card-face card-back" id="back3"></div>
-                    <div class="card-face card-front orbitron text-4xl text-yellow-500 font-black" id="res3">?</div>
-                </div>
-            </div>
-            <div class="card-container" onclick="selectCard(4)">
-                <div class="card" id="card4">
-                    <div class="card-face card-back" id="back4"></div>
-                    <div class="card-face card-front orbitron text-4xl text-yellow-500 font-black" id="res4">?</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass p-6 rounded-3xl mb-8">
-            <div class="flex justify-between items-end mb-4">
-                <div>
-                    <span class="text-xs font-bold text-gray-400 block mb-1 uppercase">Your Bet</span>
-                    <span class="text-2xl font-bold text-blue-400 orbitron" id="betDisplay">0.10 TON</span>
-                </div>
-                <div class="text-right">
-                    <span class="text-xs font-bold text-gray-400 block mb-1 uppercase">Potential Win (3.3x)</span>
-                    <span class="text-2xl font-bold text-yellow-500 orbitron" id="winDisplay">0.33 TON</span>
-                </div>
-            </div>
-
-            <input type="range" min="0.1" max="3.0" step="0.1" value="0.1" class="w-full mb-8 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500" id="betRange" oninput="updateBet(this.value)">
             
-            <div id="timerDisplay" class="text-center text-yellow-500 font-bold mb-4 hidden orbitron">
-                REVEALING IN: <span id="seconds" class="text-3xl">45</span>S
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="card-container" id="container1" onclick="selectCard(1)">
+                    <div class="card" id="card1">
+                        <div class="card-face card-back" id="back1"></div>
+                        <div class="card-face card-front"><span class="text-4xl font-black" id="res1">?</span></div>
+                    </div>
+                </div>
+                <div class="card-container" id="container2" onclick="selectCard(2)">
+                    <div class="card" id="card2">
+                        <div class="card-face card-back" id="back2"></div>
+                        <div class="card-face card-front"><span class="text-4xl font-black" id="res2">?</span></div>
+                    </div>
+                </div>
+                <div class="card-container" id="container3" onclick="selectCard(3)">
+                    <div class="card" id="card3">
+                        <div class="card-face card-back" id="back3"></div>
+                        <div class="card-face card-front"><span class="text-4xl font-black" id="res3">?</span></div>
+                    </div>
+                </div>
+                <div class="card-container" id="container4" onclick="selectCard(4)">
+                    <div class="card" id="card4">
+                        <div class="card-face card-back" id="back4"></div>
+                        <div class="card-face card-front"><span class="text-4xl font-black" id="res4">?</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-5 rounded-2xl mb-6">
+            <div class="flex justify-between mb-1">
+                <span class="text-[12px] text-gray-400">BET AMOUNT</span>
+                <span class="text-[12px] text-blue-400 font-bold" id="betDisplay">0.1 TON</span>
+            </div>
+            <input type="range" min="0.1" max="3.0" step="0.1" value="0.1" class="w-full mb-4 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
+            
+            <div class="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-blue-500/30 mb-4">
+                <span class="text-[11px] text-gray-300 uppercase">Est. Payout (3.3x)</span>
+                <span class="text-xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span>
             </div>
 
-            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-2xl font-black text-xl orbitron shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:grayscale" onclick="handlePlay()">
+            <button id="betBtn" class="w-full bg-blue-600 py-3 rounded-xl font-bold shadow-lg active:scale-95 disabled:opacity-50" onclick="handlePlay()">
                 PLACE BET
             </button>
         </div>
 
-        <div class="glass rounded-2xl overflow-hidden mb-10">
-            <div class="bg-white/5 px-4 py-3 border-b border-white/10">
-                <h3 class="orbitron text-xs font-bold text-gray-300">RECENT GAMES</h3>
-            </div>
-            <table class="w-full text-left text-xs">
+        <div class="glass p-4 rounded-xl mb-10">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-3">Game History</p>
+            <table>
                 <thead>
-                    <tr class="text-gray-500 border-b border-white/5">
-                        <th class="px-4 py-3">CARD</th>
-                        <th class="px-4 py-3">AMOUNT</th>
-                        <th class="px-4 py-3">RESULT</th>
-                    </tr>
+                    <tr class="text-gray-500"><th>Time</th><th>Bet</th><th>Result</th></tr>
                 </thead>
                 <tbody id="historyBody">
-                    <tr class="border-b border-white/5">
-                        <td class="px-4 py-3 font-bold text-blue-400">#2</td>
-                        <td class="px-4 py-3">0.5 TON</td>
-                        <td class="px-4 py-3 text-red-500 uppercase font-bold">Lost</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3 font-bold text-blue-400">#4</td>
-                        <td class="px-4 py-3">1.0 TON</td>
-                        <td class="px-4 py-3 text-green-500 uppercase font-bold">Won</td>
-                    </tr>
+                    <tr><td colspan="3" class="text-center py-4 text-gray-600">No records yet</td></tr>
                 </tbody>
             </table>
         </div>
@@ -197,87 +142,63 @@
         let isGameState = "LOCKED";
         const gameAudio = new Audio("https://mcjkstdplhybfjjjtzyl.supabase.co/storage/v1/object/public/audio/sonican-powerful-epic-orchestral-45-seconds-330378.mp3");
 
-        // 1. Enter Game Logic
         function enableAudio() {
             gameAudio.play().then(() => {
                 gameAudio.pause();
                 gameAudio.currentTime = 0;
-                document.getElementById('soundOverlay').classList.add('hidden');
-                isGameState = "IDLE"; // Unlock game
-            }).catch(e => alert("Please interact with the screen first."));
+                document.getElementById('audio-locker').style.display = 'none';
+                isGameState = "IDLE";
+            });
         }
 
-        // 4. Select Card Logic
+        function updateBet(v) {
+            document.getElementById('betDisplay').innerText = parseFloat(v).toFixed(1) + " TON";
+            document.getElementById('winDisplay').innerText = (v * 3.3).toFixed(2) + " TON";
+        }
+
         function selectCard(n) {
             if(isGameState !== "IDLE") return;
             selected = n;
-            document.querySelectorAll('.card-face').forEach(f => f.classList.remove('selected-card'));
+            document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card'));
             document.getElementById('back' + n).classList.add('selected-card');
-            document.getElementById('front' + n).classList.add('selected-card');
-        }
-
-        // 3. Auto Calculate Win (3.3x)
-        function updateBet(v) { 
-            const bet = parseFloat(v);
-            const win = (bet * 3.3).toFixed(2);
-            document.getElementById('betDisplay').innerText = bet.toFixed(2) + " TON"; 
-            document.getElementById('winDisplay').innerText = win + " TON";
         }
 
         async function handlePlay() {
-            if(selected === 0) return alert("Select a Card First!");
+            if(selected === 0) return alert("Select a card first!");
             if(isGameState !== "IDLE") return;
 
             try {
-                gameAudio.currentTime = 0;
-                await gameAudio.play();
-            } catch(e) { console.log("Audio Error"); }
-
-            isGameState = "BETTING";
-            const btn = document.getElementById('betBtn');
-            btn.disabled = true;
-            btn.innerText = "WAITING...";
-            
-            startGame();
-        }
-
-        function startGame() {
-            document.querySelectorAll('.card').forEach(c => {
-                c.classList.remove('revealed');
-                c.style.animation = "shake 0.2s infinite";
-            });
-
-            document.getElementById('timerDisplay').classList.remove('hidden');
-            let timer = 45;
-            const countdown = setInterval(() => {
-                timer--;
-                document.getElementById('seconds').innerText = timer;
-                if(timer <= 0) {
-                    clearInterval(countdown);
-                    revealFinal();
-                }
-            }, 1000);
+                isGameState = "BETTING";
+                gameAudio.play();
+                document.getElementById('betBtn').innerText = "GAME STARTED...";
+                document.getElementById('betBtn').disabled = true;
+                
+                // Shake cards
+                document.querySelectorAll('.card').forEach(c => c.classList.add('animate-pulse'));
+                
+                setTimeout(() => revealFinal(), 3000); // 3 sec for demo
+            } catch(e) { alert("Error starting game"); }
         }
 
         function revealFinal() {
             gameAudio.pause();
-            isGameState = "REVEALED";
             document.querySelectorAll('.card').forEach(c => {
-                c.style.animation = "none";
+                c.classList.remove('animate-pulse');
                 c.classList.add('revealed');
             });
 
-            // Mock Results
-            const results = [7, 12, 1, 9];
-            results.forEach((v, i) => document.getElementById('res' + (i+1)).innerText = v);
+            // Logic for History
+            const betVal = document.getElementById('betDisplay').innerText;
+            const history = document.getElementById('historyBody');
+            const now = new Date().toLocaleTimeString();
+            history.innerHTML = `<tr><td>${now}</td><td>${betVal}</td><td class="text-red-500">Lost</td></tr>` + history.innerHTML;
 
             setTimeout(() => {
-                const btn = document.getElementById('betBtn');
-                btn.disabled = false;
-                btn.innerText = "PLACE BET";
-                document.getElementById('timerDisplay').classList.add('hidden');
                 isGameState = "IDLE";
-            }, 5000);
+                document.getElementById('betBtn').disabled = false;
+                document.getElementById('betBtn').innerText = "PLACE BET";
+                document.querySelectorAll('.card').forEach(c => c.classList.remove('revealed'));
+            }, 4000);
         }
 
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
