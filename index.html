@@ -14,57 +14,55 @@
             color: #ffffff;
             min-height: 100vh;
             overflow-x: hidden;
+            user-select: none;
         }
 
-        /* 3D CARD ENGINE */
-        .card-container { perspective: 1000px; width: 100%; height: 160px; }
-        
+        .card-container { perspective: 1000px; width: 100%; height: 160px; cursor: pointer; }
         .card {
             width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
-            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
-        /* THE FLIP: Rotate 180 degrees on Y axis */
         .card.revealed { transform: rotateY(180deg); }
         
         .card-face {
             position: absolute; width: 100%; height: 100%;
             backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
             border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
+            border: 2px solid rgba(59, 130, 246, 0.5);
         }
 
-        /* Front: Result Side (Turns 180 deg by default) */
+        /* Result Side */
         .card-front {
             background-image: url('https://i.ibb.co/CKSQMPnm/Screenshot-2026-04-30-14-09-57-530-com-google-android-googlequicksearchbox-edit.jpg');
             background-size: cover; background-position: center;
-            transform: rotateY(180deg); /* Turned around behind back */
-            border: 2px solid #fbbf24;
+            transform: rotateY(180deg);
+            border-color: #fbbf24;
         }
 
-        /* Back: Logo Side (Visible first) */
+        /* Logo Side */
         .card-back {
             background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg');
             background-size: cover; background-position: center;
-            border: 2px solid #3b82f6;
         }
         
-        .result-val { font-size: 3rem; font-weight: 900; color: #fbbf24; text-shadow: 2px 2px 10px #000; }
+        /* 🔥 SELECTION HIGHLIGHT (Neon Green) */
+        .selected-card { 
+            border: 4px solid #22c55e !important; 
+            box-shadow: 0 0 20px #22c55e, inset 0 0 10px #22c55e;
+            transform: scale(1.02);
+        }
         
-        /* SHAKING */
+        .result-val { font-size: 3rem; font-weight: 900; color: #fbbf24; text-shadow: 0 0 15px #000; }
+        
         @keyframes shake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(1deg) translate(1px, 1px); }
-            50% { transform: rotate(-1deg) translate(-1px, -1px); }
-            75% { transform: rotate(1deg) translate(-1px, 1px); }
-            100% { transform: rotate(0deg); }
+            0% { transform: rotate(0.5deg) translate(1px, 1px); }
+            50% { transform: rotate(-0.5deg) translate(-1px, -1px); }
+            100% { transform: rotate(0.5deg) translate(1px, 1px); }
         }
-        .shaking { animation: shake 0.2s infinite; }
+        .shaking { animation: shake 0.15s infinite; }
         
-        .selected-card { border: 4px solid #fbbf24 !important; box-shadow: 0 0 25px #fbbf24; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
@@ -78,11 +76,11 @@
     <div class="max-w-md mx-auto">
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="glass p-3 rounded-xl text-center">
-                <p class="text-[10px] text-gray-400">PENDING WINS</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase">Pending Wins</p>
                 <p class="text-lg font-bold text-green-500" id="pending-win">0.00 TON</p>
             </div>
             <div class="glass p-3 rounded-xl text-center">
-                <p class="text-[10px] text-gray-400">REFERRAL</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase">Referral</p>
                 <p class="text-lg font-bold text-yellow-500" id="ref-balance">0.00 TON</p>
             </div>
         </div>
@@ -114,18 +112,18 @@
             </div>
         </div>
 
-        <div class="glass p-6 rounded-2xl shadow-xl">
+        <div class="glass p-6 rounded-2xl shadow-2xl border-blue-900/30">
             <div class="flex justify-between mb-2">
-                <span class="text-sm font-bold text-gray-400 uppercase">Bet Amount</span>
+                <span class="text-sm font-bold text-gray-300">BET AMOUNT</span>
                 <span class="text-sm font-bold text-blue-400" id="betDisplay">0.1 TON</span>
             </div>
-            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-6" id="betRange" oninput="updateBet(this.value)">
+            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
             
             <div id="timerDisplay" class="text-center text-yellow-500 font-bold mb-4 hidden">
-                REVEALING IN: <span id="seconds" class="text-2xl">45</span>s
+                REVEALING IN: <span id="seconds" class="text-3xl">45</span>s
             </div>
 
-            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg transition-all active:scale-95" onclick="runProfessionalBet()">
+            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50" onclick="processBet()">
                 PLACE BET (3.3x)
             </button>
         </div>
@@ -133,77 +131,84 @@
 
     <script>
         let selected = 0;
-        let isRunning = false;
-        
-        // ULTIMATE AUDIO SYSTEM
-        const audioUrl = "https://github.com/ggg121314/Golden-Game-Global-/raw/refs/heads/main/sonican-powerful-epic-orchestral-45-seconds-330378.mp3";
-        const gameAudio = new Audio(audioUrl);
-        gameAudio.crossOrigin = "anonymous";
+        let isPlaying = false;
+
+        // ✅ PRO AUDIO SYSTEM (FIXED CDN)
+        const AUDIO_URL = "https://raw.githubusercontent.com/ggg121314/Golden-Game-Global-/main/sonican-powerful-epic-orchestral-45-seconds-330378.mp3";
+        const gameAudio = new Audio(AUDIO_URL);
         gameAudio.preload = "auto";
+        gameAudio.crossOrigin = "anonymous";
+
+        // ✅ MOBILE AUDIO UNLOCKER (Crucial Fix)
+        document.addEventListener('click', function unlockAudio() {
+            gameAudio.play().then(() => {
+                gameAudio.pause();
+                gameAudio.currentTime = 0;
+            }).catch(e => console.log("Waiting for user gesture..."));
+            document.removeEventListener('click', unlockAudio);
+        }, { once: true });
 
         function selectCard(n) {
-            if(isRunning) return;
+            if(isPlaying) return;
             selected = n;
+            // Clear all borders
             document.querySelectorAll('.card-back').forEach(b => b.classList.remove('selected-card'));
-            document.getElementById('back'+n).classList.add('selected-card');
+            // Add Green Neon Border to selected
+            document.getElementById('back' + n).classList.add('selected-card');
         }
 
         function updateBet(v) { document.getElementById('betDisplay').innerText = v + " TON"; }
 
-        function runProfessionalBet() {
-            if(selected === 0) return alert("Please select a card!");
-            if(isRunning) return;
+        async function processBet() {
+            if(selected === 0) return alert("Please select a card first!");
+            if(isPlaying) return;
 
-            // 1. FORCE START AUDIO
-            gameAudio.currentTime = 0;
-            gameAudio.play().catch(e => {
-                console.error("Audio block bypass failed, retrying...");
-                // Force a second play attempt
-                let retry = setInterval(() => { gameAudio.play(); clearInterval(retry); }, 100);
-            });
+            // ✅ SAFE PLAY LOGIC
+            try {
+                gameAudio.currentTime = 0;
+                await gameAudio.play();
+            } catch (err) {
+                console.log("Play failed, reloading...");
+                gameAudio.load();
+                gameAudio.oncanplaythrough = () => gameAudio.play();
+            }
 
-            isRunning = true;
-            document.getElementById('betBtn').disabled = true;
-            document.getElementById('betBtn').innerText = "SYSTEM WORKING...";
+            isPlaying = true;
+            const btn = document.getElementById('betBtn');
+            btn.disabled = true;
+            btn.innerText = "WAITING FOR BLOCKCHAIN...";
 
-            // 2. START SHAKING
+            // Start Animation
             document.querySelectorAll('.card').forEach(c => {
                 c.classList.remove('revealed');
                 c.classList.add('shaking');
             });
 
-            // 3. SHOW TIMER
             document.getElementById('timerDisplay').classList.remove('hidden');
-            let timeLeft = 45;
-            const timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('seconds').innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    revealFinal();
+            let timer = 45;
+            const countdown = setInterval(() => {
+                timer--;
+                document.getElementById('seconds').innerText = timer;
+                if(timer <= 0) {
+                    clearInterval(countdown);
+                    showResults();
                 }
             }, 1000);
         }
 
-        function revealFinal() {
-            // 4. STOP AUDIO & SHAKING
+        function showResults() {
             gameAudio.pause();
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('shaking'));
-
-            // 5. 180 DEGREE FLIP
             document.querySelectorAll('.card').forEach(c => {
+                c.classList.remove('shaking');
                 c.classList.add('revealed');
             });
 
-            // 6. SHOW MOCK RESULTS (Will replace with real Contract Event)
-            const mockRes = [7, 12, 1, 9];
-            mockRes.forEach((val, i) => {
-                document.getElementById('res' + (i+1)).innerText = val;
-            });
+            // Mock result values
+            const mock = [7, 12, 1, 9];
+            mock.forEach((v, i) => document.getElementById('res' + (i+1)).innerText = v);
 
-            // RESET
             setTimeout(() => {
-                isRunning = false;
+                isPlaying = false;
                 document.getElementById('betBtn').disabled = false;
                 document.getElementById('betBtn').innerText = "PLACE BET (3.3x)";
                 document.getElementById('timerDisplay').classList.add('hidden');
@@ -217,3 +222,4 @@
     </script>
 </body>
 </html>
+
