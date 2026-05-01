@@ -16,7 +16,6 @@
             padding: 10px;
         }
 
-        /* Card Styling - ဖဲချပ်ပုံစံ */
         .card-container { perspective: 1000px; width: 100%; height: 180px; position: relative; }
         .card {
             width: 100%; height: 100%; position: relative;
@@ -29,109 +28,116 @@
             backface-visibility: hidden; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
         }
-        .card-front { background: white; color: #1e293b; transform: rotateY(180deg); }
+        .card-front { background: white; color: #1e293b; transform: rotateY(180deg); border: 3px solid #fbbf24; }
         .card-back {
             background-image: url('https://i.ibb.co/BVb4wg2R/Screenshot-2026-04-30-14-09-16-915-com-google-android-googlequicksearchbox-edit.jpg');
             background-size: cover; border: 2px solid #3b82f6;
         }
         .selected-card { border: 4px solid #22c55e !important; box-shadow: 0 0 20px #22c55e; }
 
-        /* Sound Overlay over Cards */
         #audio-locker {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+            position: absolute; inset: 0; background: rgba(0,0,0,0.85);
             z-index: 100; border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(6px);
         }
 
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-withdraw { background: #2563eb; color: white; font-size: 10px; padding: 4px 8px; border-radius: 5px; }
+        .btn-withdraw { background: #2563eb; color: white; font-size: 10px; padding: 4px 10px; border-radius: 5px; font-weight: bold; }
         
-        /* Table Styling */
         table { width: 100%; font-size: 12px; border-collapse: collapse; }
         th, td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
+        
+        /* Shaking animation for cards during wait */
+        .shaking { animation: shake 0.5s infinite; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-1px, 0px) rotate(-1deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center mb-4 px-2">
         <h1 class="text-lg font-bold text-blue-400">GGG QUAD-CARD</h1>
         <div id="ton-connect"></div>
     </div>
 
     <div class="max-w-md mx-auto">
         <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="glass p-3 rounded-xl border-green-500/50 border">
-                <p class="text-[10px] text-green-400 font-bold uppercase">Pending Wins</p>
-                <p class="text-md font-bold text-white mb-2" id="pending-win">0.00 TON</p>
-                <button class="btn-withdraw">WITHDRAW</button>
+            <div class="glass p-3 rounded-xl border-green-500/50 border flex flex-col items-center">
+                <p class="text-[10px] text-green-400 font-bold uppercase mb-1">Pending Wins</p>
+                <p class="text-lg font-bold text-white mb-2" id="pending-win">0.00 TON</p>
+                <button class="btn-withdraw w-full">WITHDRAW</button>
             </div>
-            <div class="glass p-3 rounded-xl border-green-500/50 border">
-                <p class="text-[10px] text-green-400 font-bold uppercase">Referral</p>
-                <p class="text-md font-bold text-white mb-2" id="ref-balance">0.00 TON</p>
-                <button class="btn-withdraw">WITHDRAW</button>
+            <div class="glass p-3 rounded-xl border-green-500/50 border flex flex-col items-center">
+                <p class="text-[10px] text-green-400 font-bold uppercase mb-1">Referral</p>
+                <p class="text-lg font-bold text-white mb-2" id="ref-balance">0.00 TON</p>
+                <button class="btn-withdraw w-full">WITHDRAW</button>
             </div>
         </div>
 
-        <div class="relative">
+        <div class="relative px-2">
             <div id="audio-locker">
-                <button onclick="enableAudio()" class="bg-blue-600 px-6 py-3 rounded-full font-bold shadow-lg animate-bounce">
+                <button onclick="enableAudio()" class="bg-blue-600 px-8 py-4 rounded-full font-bold shadow-lg animate-pulse text-white ring-4 ring-blue-500/30">
                     🔊 ENTER WITH SONG
                 </button>
             </div>
             
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="card-container" id="container1" onclick="selectCard(1)">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="card-container" onclick="selectCard(1)">
                     <div class="card" id="card1">
                         <div class="card-face card-back" id="back1"></div>
-                        <div class="card-face card-front"><span class="text-4xl font-black" id="res1">?</span></div>
+                        <div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res1">?</span></div>
                     </div>
                 </div>
-                <div class="card-container" id="container2" onclick="selectCard(2)">
+                <div class="card-container" onclick="selectCard(2)">
                     <div class="card" id="card2">
                         <div class="card-face card-back" id="back2"></div>
-                        <div class="card-face card-front"><span class="text-4xl font-black" id="res2">?</span></div>
+                        <div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res2">?</span></div>
                     </div>
                 </div>
-                <div class="card-container" id="container3" onclick="selectCard(3)">
+                <div class="card-container" onclick="selectCard(3)">
                     <div class="card" id="card3">
                         <div class="card-face card-back" id="back3"></div>
-                        <div class="card-face card-front"><span class="text-4xl font-black" id="res3">?</span></div>
+                        <div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res3">?</span></div>
                     </div>
                 </div>
-                <div class="card-container" id="container4" onclick="selectCard(4)">
+                <div class="card-container" onclick="selectCard(4)">
                     <div class="card" id="card4">
                         <div class="card-face card-back" id="back4"></div>
-                        <div class="card-face card-front"><span class="text-4xl font-black" id="res4">?</span></div>
+                        <div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res4">?</span></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="glass p-5 rounded-2xl mb-6">
-            <div class="flex justify-between mb-1">
-                <span class="text-[12px] text-gray-400">BET AMOUNT</span>
-                <span class="text-[12px] text-blue-400 font-bold" id="betDisplay">0.1 TON</span>
+        <div class="glass p-5 rounded-2xl mb-6 mx-2 border border-blue-500/20">
+            <div class="flex justify-between mb-2">
+                <span class="text-xs text-gray-400 font-bold">BET AMOUNT</span>
+                <span class="text-sm text-blue-400 font-bold" id="betDisplay">0.1 TON</span>
             </div>
-            <input type="range" min="0.1" max="3.0" step="0.1" value="0.1" class="w-full mb-4 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
+            <input type="range" min="0.1" max="3.0" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
             
-            <div class="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-blue-500/30 mb-4">
-                <span class="text-[11px] text-gray-300 uppercase">Est. Payout (3.3x)</span>
-                <span class="text-xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span>
+            <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-blue-500/30 mb-6">
+                <span class="text-[11px] text-gray-300 font-bold uppercase">Win Payout (3.3x)</span>
+                <span class="text-2xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span>
             </div>
 
-            <button id="betBtn" class="w-full bg-blue-600 py-3 rounded-xl font-bold shadow-lg active:scale-95 disabled:opacity-50" onclick="handlePlay()">
+            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-lg shadow-xl active:scale-95 disabled:opacity-50 disabled:bg-gray-700 transition-all" onclick="handlePlay()">
                 PLACE BET
             </button>
         </div>
 
-        <div class="glass p-4 rounded-xl mb-10">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-3">Game History</p>
+        <div class="glass p-4 rounded-xl mb-10 mx-2">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Game History</p>
             <table>
                 <thead>
-                    <tr class="text-gray-500"><th>Time</th><th>Bet</th><th>Result</th></tr>
+                    <tr class="text-gray-500 text-[10px]"><th>TIME</th><th>BET</th><th>RESULT</th></tr>
                 </thead>
                 <tbody id="historyBody">
-                    <tr><td colspan="3" class="text-center py-4 text-gray-600">No records yet</td></tr>
+                    <tr><td colspan="3" class="text-center py-6 text-gray-600">No transactions recorded</td></tr>
                 </tbody>
             </table>
         </div>
@@ -148,7 +154,7 @@
                 gameAudio.currentTime = 0;
                 document.getElementById('audio-locker').style.display = 'none';
                 isGameState = "IDLE";
-            });
+            }).catch(e => alert("Please tap again to enable sound."));
         }
 
         function updateBet(v) {
@@ -164,41 +170,64 @@
         }
 
         async function handlePlay() {
-            if(selected === 0) return alert("Select a card first!");
+            if(selected === 0) return alert("Please select a card first!");
             if(isGameState !== "IDLE") return;
 
-            try {
-                isGameState = "BETTING";
-                gameAudio.play();
-                document.getElementById('betBtn').innerText = "GAME STARTED...";
-                document.getElementById('betBtn').disabled = true;
-                
-                // Shake cards
-                document.querySelectorAll('.card').forEach(c => c.classList.add('animate-pulse'));
-                
-                setTimeout(() => revealFinal(), 3000); // 3 sec for demo
-            } catch(e) { alert("Error starting game"); }
+            isGameState = "BETTING";
+            const btn = document.getElementById('betBtn');
+            btn.disabled = true;
+            
+            // Start Music
+            gameAudio.currentTime = 0;
+            gameAudio.play();
+            
+            // Visual feedback
+            document.querySelectorAll('.card').forEach(c => c.classList.add('shaking'));
+            
+            // Countdown 45 seconds
+            let timeLeft = 45;
+            const timer = setInterval(() => {
+                timeLeft--;
+                btn.innerText = `REVEALING IN ${timeLeft}s...`;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    revealFinal();
+                }
+            }, 1000);
         }
 
         function revealFinal() {
             gameAudio.pause();
-            document.querySelectorAll('.card').forEach(c => {
-                c.classList.remove('animate-pulse');
+            isGameState = "REVEALED";
+            
+            // Random Number Generation (အဖြေထုတ်ခြင်း)
+            const luckyNumbers = Array.from({length: 4}, () => Math.floor(Math.random() * 15) + 1);
+            
+            document.querySelectorAll('.card').forEach((c, index) => {
+                const resSpan = document.getElementById('res' + (index + 1));
+                resSpan.innerText = luckyNumbers[index]; // ကတ်တစ်ခုချင်းစီမှာ နံပါတ်ထည့်မယ်
+                c.classList.remove('shaking');
                 c.classList.add('revealed');
             });
 
-            // Logic for History
+            // History Logic
             const betVal = document.getElementById('betDisplay').innerText;
             const history = document.getElementById('historyBody');
-            const now = new Date().toLocaleTimeString();
-            history.innerHTML = `<tr><td>${now}</td><td>${betVal}</td><td class="text-red-500">Lost</td></tr>` + history.innerHTML;
+            const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Demo win logic (If number > 10, show as win for demo)
+            const resultMsg = luckyNumbers[selected-1] > 10 ? '<span class="text-green-500">Won</span>' : '<span class="text-red-500">Lost</span>';
+            
+            if(history.innerText.includes("No transactions")) history.innerHTML = '';
+            history.innerHTML = `<tr><td>${now}</td><td>${betVal}</td><td>${resultMsg}</td></tr>` + history.innerHTML;
 
+            // Reset Game after 5 seconds
             setTimeout(() => {
-                isGameState = "IDLE";
-                document.getElementById('betBtn').disabled = false;
                 document.getElementById('betBtn').innerText = "PLACE BET";
+                document.getElementById('betBtn').disabled = false;
                 document.querySelectorAll('.card').forEach(c => c.classList.remove('revealed'));
-            }, 4000);
+                isGameState = "IDLE";
+            }, 5000);
         }
 
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
