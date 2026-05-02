@@ -67,9 +67,9 @@
     </div>
 
     <script>
-        // CRITICAL: Contract address and proper GitHub URL
         const CONTRACT_ADDRESS = "EQBLT4kSD6hII4I5GDYLojzoTJDu6t715G027p8J6dJQ-f1U";
-        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json";
+        // manifest URL ကို version ပါထည့်ပြီး cache ရှင်းစေခြင်း
+        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json?v=2.1";
 
         let selected = 0;
         let isGameState = "LOCKED";
@@ -82,8 +82,7 @@
 
         function enableAudio() {
             gameAudio.play().then(() => {
-                gameAudio.pause();
-                gameAudio.currentTime = 0;
+                gameAudio.pause(); gameAudio.currentTime = 0;
                 document.getElementById('audio-locker').style.display = 'none';
                 isGameState = "IDLE";
             });
@@ -102,43 +101,38 @@
         }
 
         async function handlePlay() {
-            if (!tonConnectUI.connected) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-            if (selected === 0) {
-                alert("Please select a card first!");
-                return;
-            }
-
+            if (!tonConnectUI.connected) return alert("Please connect wallet!");
+            if (selected === 0) return alert("Select a card!");
+            
             const betAmount = document.getElementById('betRange').value;
             const betInNano = (parseFloat(betAmount) * 1000000000).toString();
 
-            // Tact BetGame2: OpCode 0xCCCCDDDD
+            // Tact BetGame2 Payload (Op: 0xCCCCDDDD)
             const cell = new TonWeb.boc.Cell();
             cell.bits.writeUint(0xCCCCDDDD, 32); 
             cell.bits.writeCoins(new TonWeb.utils.BN(betInNano)); 
             cell.bits.writeUint(selected, 8); 
-            // Optional Referrer (Set null for now)
+            // referrer: Address? (Using '0' flag for Null/None)
             cell.bits.writeUint(0, 1); 
 
-            const payload = TonWeb.utils.bytesToBase64(await cell.toBoc());
-
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 300,
-                messages: [{
-                    address: CONTRACT_ADDRESS,
-                    amount: (parseFloat(betAmount) + 0.05) * 1000000000, 
-                    payload: payload
-                }]
-            };
-
             try {
+                const boc = await cell.toBoc();
+                const payload = TonWeb.utils.bytesToBase64(boc);
+
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 300,
+                    messages: [{
+                        address: CONTRACT_ADDRESS,
+                        amount: (parseFloat(betAmount) + 0.05) * 1000000000, 
+                        payload: payload
+                    }]
+                };
+
                 await tonConnectUI.sendTransaction(transaction);
                 startVisualGame();
             } catch (e) {
-                console.error(e);
-                alert("Transaction failed or cancelled.");
+                console.error("Bet Error:", e);
+                alert("Transaction error. Check console.");
             }
         }
 
@@ -147,25 +141,18 @@
             gameAudio.currentTime = 0;
             gameAudio.play();
             document.querySelectorAll('.card').forEach(c => c.classList.add('shaking'));
-            
             let timeLeft = 45;
-            const btn = document.getElementById('betBtn');
             const timer = setInterval(() => {
                 timeLeft--;
-                btn.innerText = `REVEALING IN ${timeLeft}s...`;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    revealFinal();
-                }
+                document.getElementById('betBtn').innerText = `REVEALING ${timeLeft}s...`;
+                if(timeLeft <= 0) { clearInterval(timer); revealFinal(); }
             }, 1000);
         }
 
         function revealFinal() {
             gameAudio.pause();
-            // Contract မှ result ဖမ်းရန် အဆင့် ၄ မှာ ဆက်လုပ်မည်
             document.querySelectorAll('.card').forEach(c => {
-                c.classList.remove('shaking');
-                c.classList.add('revealed');
+                c.classList.remove('shaking'); c.classList.add('revealed');
             });
             setTimeout(() => {
                 isGameState = "IDLE";
@@ -177,15 +164,16 @@
         async function sendClaim(comment) {
             if (!tonConnectUI.connected) return;
             const cell = new TonWeb.boc.Cell();
-            cell.bits.writeUint(0, 32); // Simple comment prefix
+            cell.bits.writeUint(0, 32); // Simple text prefix
             cell.bits.writeString(comment);
-            
+            const payload = TonWeb.utils.bytesToBase64(await cell.toBoc());
+
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 300,
                 messages: [{
                     address: CONTRACT_ADDRESS,
-                    amount: "50000000", // 0.05 TON for gas
-                    payload: TonWeb.utils.bytesToBase64(await cell.toBoc())
+                    amount: "50000000", 
+                    payload: payload
                 }]
             };
             await tonConnectUI.sendTransaction(transaction);
