@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GGG QUAD-CARD LEGACY</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tonweb@0.0.66/dist/tonweb.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.66/dist/tonweb.bundle.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
         body { background: radial-gradient(circle, #0d1b2a 0%, #000814 100%); font-family: 'Orbitron', sans-serif; color: #ffffff; min-height: 100vh; padding: 10px; }
@@ -68,7 +68,7 @@
 
     <script>
         const CONTRACT_ADDRESS = "EQBLT4kSD6hII4I5GDYLojzoTJDu6t715G027p8J6dJQ-f1U";
-        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json?v=2.2";
+        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json?v=2.3";
 
         let selected = 0;
         let isGameState = "LOCKED";
@@ -103,35 +103,39 @@
             if (!tonConnectUI.connected) return alert("Please connect wallet!");
             if (selected === 0) return alert("Select a card!");
             
-            const betAmount = document.getElementById('betRange').value;
-            const betInNano = TonWeb.utils.toNano(betAmount).toString();
-
-            // Tact BetGame2 Payload (Op: 0xCCCCDDDD)
-            const cell = new TonWeb.boc.Cell();
-            cell.bits.writeUint(0xCCCCDDDD, 32); 
-            cell.bits.writeCoins(new TonWeb.utils.BN(betInNano)); 
-            cell.bits.writeUint(selected, 8); 
-            // referrer: Address? (Tact format for Optional None is just '0' bit)
-            cell.bits.writeBit(0); 
-
             try {
-                const boc = await cell.toBoc();
+                const betAmountVal = document.getElementById('betRange').value;
+                const tonweb = new TonWeb();
+                
+                // V1.8 Logic: Nano conversion + Gas
+                const betInNano = TonWeb.utils.toNano(betAmountVal);
+                const totalAmount = betInNano.add(TonWeb.utils.toNano("0.05"));
+
+                // ✅ EXACT V1.8 SERIALIZATION METHOD
+                const cell = new TonWeb.boc.Cell();
+                cell.bits.writeUint(0xCCCCDDDD, 32);      // Game 2 Opcode
+                cell.bits.writeCoins(betInNano);          // Amount
+                cell.bits.writeUint(selected, 8);         // Chosen Card
+                cell.bits.writeAddress(null);             // ✅ FIXED: V1.8 Magic (Optional Address)
+
+                const boc = await cell.toBoc(false);
                 const payload = TonWeb.utils.bytesToBase64(boc);
 
                 const transaction = {
-                    validUntil: Math.floor(Date.now() / 1000) + 300,
+                    validUntil: Math.floor(Date.now() / 1000) + 360,
                     messages: [{
                         address: CONTRACT_ADDRESS,
-                        amount: TonWeb.utils.toNano((parseFloat(betAmount) + 0.05).toString()).toString(), 
+                        amount: totalAmount.toString(),
                         payload: payload
                     }]
                 };
 
                 await tonConnectUI.sendTransaction(transaction);
                 startVisualGame();
+
             } catch (e) {
                 console.error("Bet Error:", e);
-                alert("Transaction failed or rejected.");
+                alert("Transaction Failed: " + e.message);
             }
         }
 
@@ -145,10 +149,7 @@
             const timer = setInterval(() => {
                 timeLeft--;
                 btn.innerText = `REVEALING ${timeLeft}s...`;
-                if(timeLeft <= 0) { 
-                    clearInterval(timer); 
-                    revealFinal(); 
-                }
+                if(timeLeft <= 0) { clearInterval(timer); revealFinal(); }
             }, 1000);
         }
 
@@ -161,8 +162,6 @@
                 isGameState = "IDLE";
                 document.getElementById('betBtn').innerText = "PLACE BET";
                 document.querySelectorAll('.card').forEach(c => c.classList.remove('revealed'));
-                selected = 0;
-                document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card'));
             }, 5000);
         }
 
@@ -171,10 +170,11 @@
             const cell = new TonWeb.boc.Cell();
             cell.bits.writeUint(0, 32); 
             cell.bits.writeString(comment);
-            const payload = TonWeb.utils.bytesToBase64(await cell.toBoc());
+            const boc = await cell.toBoc(false);
+            const payload = TonWeb.utils.bytesToBase64(boc);
 
             const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 300,
+                validUntil: Math.floor(Date.now() / 1000) + 360,
                 messages: [{
                     address: CONTRACT_ADDRESS,
                     amount: TonWeb.utils.toNano("0.05").toString(), 
@@ -186,3 +186,4 @@
     </script>
 </body>
 </html>
+
