@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGG QUAD-CARD LEGACY</title>
+    <title>GGG QUAD-CARD V1.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/tonweb@0.0.66/dist/tonweb.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
@@ -68,7 +68,7 @@
 
     <script>
         const CONTRACT_ADDRESS = "EQBLT4kSD6hII4I5GDYLojzoTJDu6t715G027p8J6dJQ-f1U";
-        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json?v=2.3";
+        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json?v=2.4";
 
         let selected = 0;
         let isGameState = "LOCKED";
@@ -107,16 +107,16 @@
                 const betAmountVal = document.getElementById('betRange').value;
                 const tonweb = new TonWeb();
                 
-                // V1.8 Logic: Nano conversion + Gas
+                // V1.8 တုန်းက အောင်မြင်ခဲ့တဲ့ Logic အတိုင်း အတိအကျ
                 const betInNano = TonWeb.utils.toNano(betAmountVal);
                 const totalAmount = betInNano.add(TonWeb.utils.toNano("0.05"));
 
-                // ✅ EXACT V1.8 SERIALIZATION METHOD
+                // ✅ PAYLOAD လျှို့ဝှက်ချက် (Opcode + Data Mapping)
                 const cell = new TonWeb.boc.Cell();
-                cell.bits.writeUint(0xCCCCDDDD, 32);      // Game 2 Opcode
-                cell.bits.writeCoins(betInNano);          // Amount
-                cell.bits.writeUint(selected, 8);         // Chosen Card
-                cell.bits.writeAddress(null);             // ✅ FIXED: V1.8 Magic (Optional Address)
+                cell.bits.writeUint(0xCCCCDDDD, 32);      // Game 2 Opcode (မဖြစ်မနေပါရမယ်)
+                cell.bits.writeCoins(betInNano);          // amount (Int as coins)
+                cell.bits.writeUint(selected, 8);         // chosenCard (uint8)
+                cell.bits.writeAddress(null);             // referrer: Address? (null = V1.8 Magic 00 bits)
 
                 const boc = await cell.toBoc(false);
                 const payload = TonWeb.utils.bytesToBase64(boc);
@@ -130,6 +130,7 @@
                     }]
                 };
 
+                console.log("Sending Game 2 Bet with Payload:", payload);
                 await tonConnectUI.sendTransaction(transaction);
                 startVisualGame();
 
@@ -149,7 +150,10 @@
             const timer = setInterval(() => {
                 timeLeft--;
                 btn.innerText = `REVEALING ${timeLeft}s...`;
-                if(timeLeft <= 0) { clearInterval(timer); revealFinal(); }
+                if(timeLeft <= 0) { 
+                    clearInterval(timer); 
+                    revealFinal(); 
+                }
             }, 1000);
         }
 
@@ -162,6 +166,8 @@
                 isGameState = "IDLE";
                 document.getElementById('betBtn').innerText = "PLACE BET";
                 document.querySelectorAll('.card').forEach(c => c.classList.remove('revealed'));
+                selected = 0;
+                document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card'));
             }, 5000);
         }
 
