@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGG QUAD-CARD V1.3</title>
+    <title>GGG QUAD-CARD V1.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/tonweb@0.0.66/dist/tonweb.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
@@ -19,8 +19,7 @@
         .selected-card { border: 4px solid #22c55e !important; box-shadow: 0 0 20px #22c55e; }
         #audio-locker { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-withdraw { background: linear-gradient(to right, #2563eb, #1d4ed8); color: white; font-size: 10px; padding: 6px; border-radius: 6px; font-weight: bold; transition: all 0.3s; }
-        .btn-withdraw:active { transform: scale(0.95); }
+        .btn-withdraw { background: linear-gradient(to right, #2563eb, #1d4ed8); color: white; font-size: 10px; padding: 6px; border-radius: 6px; font-weight: bold; }
         .shaking { animation: shake 0.4s infinite; }
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(0px, 0px); } }
     </style>
@@ -28,7 +27,7 @@
 <body>
 
     <div class="flex justify-between items-center mb-4 px-2">
-        <h1 class="text-lg font-bold text-blue-400 tracking-tighter">GGG QUAD-CARD</h1>
+        <h1 class="text-lg font-bold text-blue-400">GGG QUAD-CARD</h1>
         <div id="ton-connect"></div>
     </div>
 
@@ -37,78 +36,67 @@
             <div class="glass p-3 rounded-xl border-blue-500/30 border text-center">
                 <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Pending Wins</p>
                 <p class="text-lg font-bold text-white mb-2" id="pending-win">0.00</p>
-                <button onclick="sendClaim('Claim')" class="btn-withdraw w-full">CLAIM WINS</button>
+                <button onclick="sendClaim('Claim')" class="btn-withdraw w-full uppercase">Claim</button>
             </div>
             <div class="glass p-3 rounded-xl border-purple-500/30 border text-center">
                 <p class="text-[9px] text-purple-400 font-bold uppercase mb-1">Referral</p>
                 <p class="text-lg font-bold text-white mb-2" id="ref-balance">0.00</p>
-                <button onclick="sendClaim('WithdrawRef')" class="btn-withdraw w-full">CLAIM REF</button>
+                <button onclick="sendClaim('WithdrawRef')" class="btn-withdraw w-full uppercase">Ref Withdraw</button>
             </div>
         </div>
 
         <div class="relative px-2 mb-4">
             <div id="audio-locker">
-                <p class="mb-4 text-xs text-blue-300 font-bold">READY TO PLAY?</p>
-                <button onclick="enableAudio()" class="bg-blue-600 px-8 py-3 rounded-full font-black shadow-lg text-white ring-4 ring-blue-500/30 active:scale-95 transition-all">ENTER GAME</button>
+                <button onclick="enableAudio()" class="bg-blue-600 px-8 py-3 rounded-full font-black text-white shadow-lg">PLAY GAME</button>
             </div>
-            
             <div class="grid grid-cols-2 gap-3">
-                <div class="card-container" onclick="selectCard(1)"><div class="card" id="card1"><div class="card-face card-back" id="back1"></div><div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res1">?</span></div></div></div>
-                <div class="card-container" onclick="selectCard(2)"><div class="card" id="card2"><div class="card-face card-back" id="back2"></div><div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res2">?</span></div></div></div>
-                <div class="card-container" onclick="selectCard(3)"><div class="card" id="card3"><div class="card-face card-back" id="back3"></div><div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res4">?</span></div></div></div>
-                <div class="card-container" onclick="selectCard(4)"><div class="card" id="card4"><div class="card-face card-back" id="back4"></div><div class="card-face card-front"><span class="text-5xl font-black text-blue-900" id="res4">?</span></div></div></div>
+                <div class="card-container" onclick="selectCard(1)"><div class="card" id="card1"><div class="card-face card-back" id="back1"></div><div class="card-face card-front text-5xl font-black text-blue-900">?</div></div></div>
+                <div class="card-container" onclick="selectCard(2)"><div class="card" id="card2"><div class="card-face card-back" id="back2"></div><div class="card-face card-front text-5xl font-black text-blue-900">?</div></div></div>
+                <div class="card-container" onclick="selectCard(3)"><div class="card" id="card3"><div class="card-face card-back" id="back3"></div><div class="card-face card-front text-5xl font-black text-blue-900">?</div></div></div>
+                <div class="card-container" onclick="selectCard(4)"><div class="card" id="card4"><div class="card-face card-back" id="back4"></div><div class="card-face card-front text-5xl font-black text-blue-900">?</div></div></div>
             </div>
         </div>
 
-        <div class="glass p-5 rounded-2xl mx-2 shadow-2xl">
-            <div class="flex justify-between mb-2"><span class="text-[10px] text-gray-400 font-bold uppercase">Bet Amount</span><span class="text-sm text-blue-400 font-bold" id="betDisplay">0.1 TON</span></div>
+        <div class="glass p-5 rounded-2xl mx-2">
+            <div class="flex justify-between mb-2"><span class="text-[10px] text-gray-400 font-bold">BET AMOUNT</span><span class="text-sm text-blue-400 font-bold" id="betDisplay">0.1 TON</span></div>
             <input type="range" min="0.1" max="3.0" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
-            <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl mb-6 border border-white/5"><span class="text-[10px] text-gray-400 font-bold uppercase">Payout (3.3x)</span><span class="text-2xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span></div>
-            <button id="betBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-lg shadow-xl active:scale-95 transition-all" onclick="handlePlay()">PLACE BET</button>
+            <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl mb-6"><span class="text-[10px] text-gray-400 font-bold uppercase">Payout (3.3x)</span><span class="text-2xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span></div>
+            <button id="betBtn" class="w-full bg-blue-600 py-4 rounded-xl font-black text-lg shadow-xl" onclick="handlePlay()">PLACE BET</button>
         </div>
     </div>
 
     <script>
-        const CONTRACT_ADDRESS = "EQDYV_dKO-1cfNbygX9_BsZ8OCsW7PKwHTmKYpSE9hIxMELm"; // ✅ မိတ်ဆွေရဲ့ Address အသစ်
-        const MANIFEST_URL = "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json";
+        const CONTRACT_ADDRESS = "EQDYV_dKO-1cfNbygX9_BsZ8OCsW7PKwHTmKYpSE9hIxMELm";
         const tonweb = new TonWeb();
-        
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json",
+            buttonRootId: 'ton-connect'
+        });
+
         let selected = 0;
         let isGameState = "LOCKED";
         const gameAudio = new Audio("https://mcjkstdplhybfjjjtzyl.supabase.co/storage/v1/object/public/audio/sonican-powerful-epic-orchestral-45-seconds-330378.mp3");
 
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: MANIFEST_URL,
-            buttonRootId: 'ton-connect'
-        });
-
-        // Referral System: URL ကနေ ?ref=Address ကို ဖမ်းဖတ်သည်
         function getReferrer() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('ref');
+            const ref = urlParams.get('ref');
+            return (ref && TonWeb.utils.Address.isValid(ref)) ? ref : null;
         }
 
         async function updateBalances() {
             if (!tonConnectUI.account) return;
             try {
-                const userAddr = new TonWeb.utils.Address(tonConnectUI.account.address).toString(true, true, true);
-                // Contract ကနေ Get Methods တွေလှမ်းခေါ်မယ်
-                const resultPending = await tonweb.call(CONTRACT_ADDRESS, 'pendingWin', [['address', userAddr]]);
-                const resultRef = await tonweb.call(CONTRACT_ADDRESS, 'referralBalance', [['address', userAddr]]);
-                
-                document.getElementById('pending-win').innerText = TonWeb.utils.fromNano(resultPending.stack[0][1]) + " TON";
-                document.getElementById('ref-balance').innerText = TonWeb.utils.fromNano(resultRef.stack[0][1]) + " TON";
-            } catch (e) { console.log("Balance Sync Error"); }
+                const addr = new TonWeb.utils.Address(tonConnectUI.account.address).toString(true, true, true);
+                const p = await tonweb.call(CONTRACT_ADDRESS, 'pendingWin', [['address', addr]]);
+                const r = await tonweb.call(CONTRACT_ADDRESS, 'referralBalance', [['address', addr]]);
+                document.getElementById('pending-win').innerText = TonWeb.utils.fromNano(p.stack[0][1]);
+                document.getElementById('ref-balance').innerText = TonWeb.utils.fromNano(r.stack[0][1]);
+            } catch (e) {}
         }
-
-        setInterval(updateBalances, 10000); // ၁၀ စက္ကန့်တစ်ခါ balance update လုပ်မယ်
+        setInterval(updateBalances, 8000);
 
         function enableAudio() {
-            gameAudio.play().then(() => {
-                gameAudio.pause(); gameAudio.currentTime = 0;
-                document.getElementById('audio-locker').style.display = 'none';
-                isGameState = "IDLE";
-            });
+            gameAudio.play().then(() => { gameAudio.pause(); document.getElementById('audio-locker').style.display = 'none'; isGameState = "IDLE"; });
         }
 
         function updateBet(v) {
@@ -124,101 +112,71 @@
         }
 
         async function handlePlay() {
-            if (!tonConnectUI.connected) return alert("Please connect wallet!");
-            if (selected === 0) return alert("Select a card first!");
+            if (!tonConnectUI.connected) return alert("Connect Wallet!");
+            if (selected === 0) return alert("Select Card!");
             
             try {
-                const betAmountVal = document.getElementById('betRange').value;
-                const betInNano = TonWeb.utils.toNano(betAmountVal);
-                const gasAmount = TonWeb.utils.toNano("0.05");
-                const totalAmount = betInNano.add(gasAmount);
+                const betVal = document.getElementById('betRange').value;
+                const betInNano = TonWeb.utils.toNano(betVal);
+                const totalAmount = betInNano.add(TonWeb.utils.toNano("0.05"));
 
+                // ✅ TACT OPTIONAL ADDRESS LOGIC (FIXED)
                 const cell = new TonWeb.boc.Cell();
-                cell.bits.writeUint(0xCCCCDDDD, 32);      // Game 2 Opcode
-                cell.bits.writeCoins(betInNano);          // amount (Int as coins)
-                cell.bits.writeUint(selected, 8);         // chosenCard (uint8)
+                cell.bits.writeUint(0xCCCCDDDD, 32);      // Opcode
+                cell.bits.writeCoins(betInNano);          // amount
+                cell.bits.writeUint(selected, 8);         // chosenCard
                 
-                // Referral Logic
-                const refAddr = getReferrer();
-                if (refAddr && TonWeb.utils.Address.isValid(refAddr)) {
-                    cell.bits.writeBit(true); // Maybe Address has value
-                    cell.bits.writeAddress(new TonWeb.utils.Address(refAddr));
+                const ref = getReferrer();
+                if (ref) {
+                    cell.bits.writeBit(1); // Set bit to 1 (Address exists)
+                    cell.bits.writeAddress(new TonWeb.utils.Address(ref));
                 } else {
-                    cell.bits.writeBit(false); // Maybe Address is null
+                    cell.bits.writeBit(0); // Set bit to 0 (Address is null)
                 }
 
                 const boc = await cell.toBoc(false);
                 const payload = TonWeb.utils.bytesToBase64(boc);
 
-                const transaction = {
-                    validUntil: Math.floor(Date.now() / 1000) + 360,
-                    messages: [{
-                        address: CONTRACT_ADDRESS,
-                        amount: totalAmount.toString(),
-                        payload: payload
-                    }]
-                };
-
-                await tonConnectUI.sendTransaction(transaction);
+                await tonConnectUI.sendTransaction({
+                    validUntil: Math.floor(Date.now() / 1000) + 300,
+                    messages: [{ address: CONTRACT_ADDRESS, amount: totalAmount.toString(), payload: payload }]
+                });
                 startVisualGame();
-
-            } catch (e) {
-                alert("Transaction Cancelled or Failed");
-            }
+            } catch (e) { console.error(e); }
         }
 
         function startVisualGame() {
-            isGameState = "BETTING";
-            gameAudio.currentTime = 0;
-            gameAudio.play();
+            isGameState = "PLAYING";
+            gameAudio.currentTime = 0; gameAudio.play();
             document.querySelectorAll('.card').forEach(c => c.classList.add('shaking'));
-            let timeLeft = 45;
+            let time = 45;
             const btn = document.getElementById('betBtn');
             const timer = setInterval(() => {
-                timeLeft--;
-                btn.innerText = `REVEALING ${timeLeft}s...`;
-                if(timeLeft <= 0) { 
-                    clearInterval(timer); 
-                    revealFinal(); 
+                time--; btn.innerText = `REVEALING ${time}s...`;
+                if(time <= 0) { 
+                    clearInterval(timer);
+                    document.querySelectorAll('.card').forEach(c => { c.classList.remove('shaking'); c.classList.add('revealed'); });
+                    setTimeout(() => {
+                        isGameState = "IDLE"; btn.innerText = "PLACE BET";
+                        document.querySelectorAll('.card').forEach(c => c.classList.remove('revealed'));
+                        selected = 0;
+                        document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card'));
+                        updateBalances();
+                    }, 5000);
                 }
             }, 1000);
         }
 
-        function revealFinal() {
-            gameAudio.pause();
-            document.querySelectorAll('.card').forEach(c => {
-                c.classList.remove('shaking'); c.classList.add('revealed');
-            });
-            setTimeout(() => {
-                isGameState = "IDLE";
-                document.getElementById('betBtn').innerText = "PLACE BET";
-                document.querySelectorAll('.card').forEach(c => {
-                    c.classList.remove('revealed');
-                });
-                selected = 0;
-                document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card'));
-                updateBalances();
-            }, 6000);
-        }
-
-        async function sendClaim(type) {
-            if (!tonConnectUI.connected) return alert("Connect Wallet First");
-            
+        async function sendClaim(text) {
             const cell = new TonWeb.boc.Cell();
             cell.bits.writeUint(0, 32); 
-            cell.bits.writeString(type); // "Claim" or "WithdrawRef"
+            cell.bits.writeString(text);
             const boc = await cell.toBoc(false);
             const payload = TonWeb.utils.bytesToBase64(boc);
-
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 360,
-                messages: [{
-                    address: CONTRACT_ADDRESS,
-                    amount: TonWeb.utils.toNano("0.05").toString(),
-                    payload: payload
-                }]
-            };
-            await tonConnectUI.sendTransaction(transaction);
+            await tonConnectUI.sendTransaction({
+                validUntil: Math.floor(Date.now() / 1000) + 300,
+                messages: [{ address: CONTRACT_ADDRESS, amount: TonWeb.utils.toNano("0.05").toString(), payload: payload }]
+            });
         }
     </script>
 </body>
