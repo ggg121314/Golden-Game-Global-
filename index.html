@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GGG QUAD-CARD V1.4</title>
+    <title>GGG QUAD-CARD V4.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/tonweb@0.0.66/dist/tonweb.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
@@ -27,7 +27,7 @@
 <body>
 
     <div class="flex justify-between items-center mb-4 px-2">
-        <h1 class="text-lg font-bold text-blue-400">GGG QUAD-CARD</h1>
+        <h1 class="text-lg font-bold text-blue-400">GGG QUAD-CARD V4.1</h1>
         <div id="ton-connect"></div>
     </div>
 
@@ -66,7 +66,8 @@
     </div>
 
     <script>
-        const CONTRACT_ADDRESS = "EQDYV_dKO-1cfNbygX9_BsZ8OCsW7PKwHTmKYpSE9hIxMELm";
+        // ၁။ Contract Config (New Address V4.1)
+        const CONTRACT_ADDRESS = "EQAJa0JNVXZcDiwh3DZX2gLz9jc5N-QRMYoWoxCjetH6cyYp";
         const tonweb = new TonWeb();
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: "https://ggg121314.github.io/Golden-Game-Global-/tonconnect-manifest.json",
@@ -87,13 +88,14 @@
             if (!tonConnectUI.account) return;
             try {
                 const addr = new TonWeb.utils.Address(tonConnectUI.account.address).toString(true, true, true);
+                // Tact Get Methods
                 const p = await tonweb.call(CONTRACT_ADDRESS, 'pendingWin', [['address', addr]]);
                 const r = await tonweb.call(CONTRACT_ADDRESS, 'referralBalance', [['address', addr]]);
                 document.getElementById('pending-win').innerText = TonWeb.utils.fromNano(p.stack[0][1]);
                 document.getElementById('ref-balance').innerText = TonWeb.utils.fromNano(r.stack[0][1]);
-            } catch (e) {}
+            } catch (e) { console.log("Balance Sync Wait..."); }
         }
-        setInterval(updateBalances, 8000);
+        setInterval(updateBalances, 10000);
 
         function enableAudio() {
             gameAudio.play().then(() => { gameAudio.pause(); document.getElementById('audio-locker').style.display = 'none'; isGameState = "IDLE"; });
@@ -111,6 +113,7 @@
             document.getElementById('back' + n).classList.add('selected-card');
         }
 
+        // ၂။ Betting Logic (V4.1 Exact Mapping)
         async function handlePlay() {
             if (!tonConnectUI.connected) return alert("Connect Wallet!");
             if (selected === 0) return alert("Select Card!");
@@ -118,20 +121,22 @@
             try {
                 const betVal = document.getElementById('betRange').value;
                 const betInNano = TonWeb.utils.toNano(betVal);
+                // Gas Buffer for V4.1 (0.05 TON)
                 const totalAmount = betInNano.add(TonWeb.utils.toNano("0.05"));
 
-                // ✅ TACT OPTIONAL ADDRESS LOGIC (FIXED)
                 const cell = new TonWeb.boc.Cell();
-                cell.bits.writeUint(0xCCCCDDDD, 32);      // Opcode
-                cell.bits.writeCoins(betInNano);          // amount
-                cell.bits.writeUint(selected, 8);         // chosenCard
+                cell.bits.writeUint(0xCCCCDDDD, 32);      // Opcode for BetGame2
+                cell.bits.writeCoins(betInNano);          // amount: Int as coins
+                cell.bits.writeUint(selected, 8);         // chosenCard: Int as uint8
                 
                 const ref = getReferrer();
                 if (ref) {
-                    cell.bits.writeBit(1); // Set bit to 1 (Address exists)
+                    // Tact Optional Address: '1' bit then Address
+                    cell.bits.writeBit(1); 
                     cell.bits.writeAddress(new TonWeb.utils.Address(ref));
                 } else {
-                    cell.bits.writeBit(0); // Set bit to 0 (Address is null)
+                    // Tact Optional Address: '0' bit (null)
+                    cell.bits.writeBit(0); 
                 }
 
                 const boc = await cell.toBoc(false);
@@ -139,10 +144,17 @@
 
                 await tonConnectUI.sendTransaction({
                     validUntil: Math.floor(Date.now() / 1000) + 300,
-                    messages: [{ address: CONTRACT_ADDRESS, amount: totalAmount.toString(), payload: payload }]
+                    messages: [{ 
+                        address: CONTRACT_ADDRESS, 
+                        amount: totalAmount.toString(), 
+                        payload: payload 
+                    }]
                 });
                 startVisualGame();
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                alert("Transaction Cancelled or Failed");
+            }
         }
 
         function startVisualGame() {
@@ -152,10 +164,14 @@
             let time = 45;
             const btn = document.getElementById('betBtn');
             const timer = setInterval(() => {
-                time--; btn.innerText = `REVEALING ${time}s...`;
+                time--; 
+                btn.innerText = `REVEALING ${time}s...`;
                 if(time <= 0) { 
                     clearInterval(timer);
-                    document.querySelectorAll('.card').forEach(c => { c.classList.remove('shaking'); c.classList.add('revealed'); });
+                    document.querySelectorAll('.card').forEach(c => { 
+                        c.classList.remove('shaking'); 
+                        c.classList.add('revealed'); 
+                    });
                     setTimeout(() => {
                         isGameState = "IDLE"; btn.innerText = "PLACE BET";
                         document.querySelectorAll('.card').forEach(c => c.classList.remove('revealed'));
@@ -168,8 +184,9 @@
         }
 
         async function sendClaim(text) {
+            if (!tonConnectUI.connected) return alert("Connect Wallet!");
             const cell = new TonWeb.boc.Cell();
-            cell.bits.writeUint(0, 32); 
+            cell.bits.writeUint(0, 32); // Comment opcode
             cell.bits.writeString(text);
             const boc = await cell.toBoc(false);
             const payload = TonWeb.utils.bytesToBase64(boc);
