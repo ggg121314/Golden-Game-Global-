@@ -39,7 +39,7 @@
                 <button onclick="sendClaim('Claim')" class="btn-withdraw w-full">CLAIM</button>
             </div>
             <div class="glass p-3 rounded-xl border-purple-500/30 text-center">
-                <p class="text-[9px] text-purple-400 font-bold uppercase">Referral</p>
+                <p class="text-[9px] text-purple-400 font-bold uppercase">Referral Earn</p>
                 <p class="text-lg font-bold text-white" id="ref-balance">0.00</p>
                 <button onclick="sendClaim('WithdrawRef')" class="btn-withdraw w-full">REF PAID</button>
             </div>
@@ -47,27 +47,29 @@
 
         <div class="relative px-2 mb-4">
             <div id="audio-locker">
-                <button onclick="enableAudio()" class="bg-blue-600 px-10 py-4 rounded-full font-black text-white shadow-2xl">START GAME</button>
+                <button onclick="enableAudio()" class="bg-blue-600 px-10 py-4 rounded-full font-black text-white shadow-2xl">ENTER SONG</button>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <div class="card-container" onclick="selectCard(1)"><div class="card" id="card1"><div class="card-face card-back" id="back1"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="val1">?</div></div></div>
-                <div class="card-container" onclick="selectCard(2)"><div class="card" id="card2"><div class="card-face card-back" id="back2"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="val2">?</div></div></div>
-                <div class="card-container" onclick="selectCard(3)"><div class="card" id="card3"><div class="card-face card-back" id="back3"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="val3">?</div></div></div>
-                <div class="card-container" onclick="selectCard(4)"><div class="card" id="card4"><div class="card-face card-back" id="back4"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="val4">?</div></div></div>
+                <div class="card-container" onclick="selectCard(1)"><div class="card" id="card1"><div class="card-face card-back" id="back1"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="res1">?</div></div></div>
+                <div class="card-container" onclick="selectCard(2)"><div class="card" id="card2"><div class="card-face card-back" id="back2"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="res2">?</div></div></div>
+                <div class="card-container" onclick="selectCard(3)"><div class="card" id="card3"><div class="card-face card-back" id="back3"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="res3">?</div></div></div>
+                <div class="card-container" onclick="selectCard(4)"><div class="card" id="card4"><div class="card-face card-back" id="back4"></div><div class="card-face card-front text-5xl font-black text-blue-900" id="res4">?</div></div></div>
             </div>
         </div>
 
         <div class="glass p-6 rounded-2xl mx-2">
             <div class="flex justify-between mb-2"><span class="text-[10px] text-gray-400">BET SIZE</span><span class="text-sm text-blue-400 font-bold" id="betDisplay">0.1 TON</span></div>
-            <input type="range" min="0.1" max="3.1" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
-            <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl mb-6"><span class="text-[10px] text-gray-400">EST. PAYOUT (3.3x)</span><span class="text-2xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span></div>
-            <p class="text-center text-[10px] text-gray-500 mb-2">+ 0.05 TON Gas Fee automatically added</p>
+            <input type="range" min="0.1" max="3.0" step="0.1" value="0.1" class="w-full mb-6 accent-blue-500" id="betRange" oninput="updateBet(this.value)">
+            <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl mb-6">
+                <span class="text-[10px] text-gray-400">EST. PAYOUT (3.3x)</span>
+                <span class="text-2xl font-bold text-yellow-400" id="winDisplay">0.33 TON</span>
+            </div>
             <button id="betBtn" class="w-full bg-blue-600 py-5 rounded-xl font-black text-xl shadow-xl" onclick="handlePlay()">PLACE BET</button>
         </div>
     </div>
 
     <script>
-        // --- Tact V5.6 Configuration ---
+        // CONTRACT ADDRESS V5.6
         const CONTRACT_ADDRESS = "EQD6TMJWL6O4h4uo7z0c35d4F_wGc3EO9JYL4pPoKqdsHpQ_";
         const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -77,11 +79,27 @@
 
         let selected = 0;
         let isGameState = "LOCKED";
-        const gameAudio = new Audio("https://mcjkstdplhybfjjjtzyl.supabase.co/storage/v1/object/public/audio/sonican-powerful-epic-orchestral-45-seconds-330378.min.mp3");
+        const gameAudio = new Audio("https://mcjkstdplhybfjjjtzyl.supabase.co/storage/v1/object/public/audio/sonican-powerful-epic-orchestral-45-seconds-330378.mp3");
 
-        function enableAudio() { gameAudio.play().then(() => { gameAudio.pause(); document.getElementById('audio-locker').style.display = 'none'; isGameState = "IDLE"; }); }
-        function updateBet(v) { document.getElementById('betDisplay').innerText = v + " TON"; document.getElementById('winDisplay').innerText = (v * 3.3).toFixed(2) + " TON"; }
-        function selectCard(n) { if(isGameState !== "IDLE") return; selected = n; document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card')); document.getElementById('back'+n).classList.add('selected-card'); }
+        function enableAudio() { 
+            gameAudio.play().then(() => { 
+                gameAudio.pause(); 
+                document.getElementById('audio-locker').style.display = 'none'; 
+                isGameState = "IDLE"; 
+            }); 
+        }
+
+        function updateBet(v) { 
+            document.getElementById('betDisplay').innerText = v + " TON"; 
+            document.getElementById('winDisplay').innerText = (v * 3.3).toFixed(2) + " TON"; 
+        }
+
+        function selectCard(n) { 
+            if(isGameState !== "IDLE") return; 
+            selected = n; 
+            document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card')); 
+            document.getElementById('back'+n).classList.add('selected-card'); 
+        }
 
         async function handlePlay() {
             if (!tonConnectUI.connected) return alert("Please Connect Wallet!");
@@ -91,23 +109,22 @@
                 const betVal = document.getElementById('betRange').value;
                 const betInNano = TonWeb.utils.toNano(betVal);
                 
-                // Gas Fee Logic for V5.6: 0.05 TON
-                const totalValue = betInNano.add(TonWeb.utils.toNano("0.05")); 
+                // Gas Fee Logic: Adding 0.04 TON to cover network costs
+                const totalValue = betInNano.add(TonWeb.utils.toNano("0.04")); 
 
-                // --- SECRET: Tact V5.6 Exact Serialization ---
+                // serialization mapping for BetGame2 (Op: 0xCCCCDDDD)
                 const cell = new TonWeb.boc.Cell();
-                cell.bits.writeUint(0xCCCCDDDD, 32);      // Opcode
-                cell.bits.writeCoins(betInNano);          // amount (payout base)
-                cell.bits.writeUint(selected, 8);         // chosenCard
+                cell.bits.writeUint(0xCCCCDDDD, 32);      
+                cell.bits.writeCoins(betInNano);          
+                cell.bits.writeUint(selected, 8);         
 
-                // Referrer Handle (Maybe Address)
                 const urlParams = new URLSearchParams(window.location.search);
                 const ref = urlParams.get('ref');
                 if (ref && TonWeb.utils.Address.isValid(ref)) {
                     cell.bits.writeBit(true); 
                     cell.bits.writeAddress(new TonWeb.utils.Address(ref));
                 } else {
-                    cell.bits.writeBit(false); // No referrer
+                    cell.bits.writeBit(false); 
                 }
 
                 const boc = await cell.toBoc(false);
@@ -123,7 +140,7 @@
                 });
                 
                 startVisualGame();
-            } catch (e) { alert("Transaction Error: " + e.message); }
+            } catch (e) { alert("Bet Failed: Check Balance"); }
         }
 
         function startVisualGame() {
@@ -132,15 +149,19 @@
             gameAudio.play();
             document.querySelectorAll('.card').forEach(c => c.classList.add('shaking'));
             
-            let time = 45; // Round ID 45s Sync
+            let time = 45;
             const btn = document.getElementById('betBtn');
             const timer = setInterval(() => {
                 time--; 
                 btn.innerText = `REVEALING IN ${time}s...`;
                 if(time <= 0) { 
                     clearInterval(timer);
-                    document.querySelectorAll('.card').forEach(c => { c.classList.remove('shaking'); c.classList.add('revealed'); });
-                    
+                    btn.innerText = "CHECKING RESULTS...";
+                    // In a real scenario, you'd fetch the result from contract events here
+                    document.querySelectorAll('.card').forEach(c => { 
+                        c.classList.remove('shaking'); 
+                        c.classList.add('revealed'); 
+                    });
                     setTimeout(() => {
                         isGameState = "IDLE"; 
                         btn.innerText = "PLACE BET";
@@ -148,7 +169,7 @@
                         selected = 0;
                         document.querySelectorAll('.card-back').forEach(f => f.classList.remove('selected-card'));
                         updateBalances();
-                    }, 5000);
+                    }, 8000);
                 }
             }, 1000);
         }
@@ -156,19 +177,15 @@
         async function updateBalances() {
             if (!tonConnectUI.account) return;
             try {
-                const rawAddr = tonConnectUI.account.address;
-                const addr = new TonWeb.utils.Address(rawAddr).toString(true, true, true);
-                
-                // Getters for V5.6
+                const addr = new TonWeb.utils.Address(tonConnectUI.account.address).toString(true, true, true);
                 const p = await tonweb.call(CONTRACT_ADDRESS, 'pendingWin', [['address', addr]]);
                 const r = await tonweb.call(CONTRACT_ADDRESS, 'referralBalance', [['address', addr]]);
                 
                 if (p && p.stack) document.getElementById('pending-win').innerText = TonWeb.utils.fromNano(p.stack[0][1]);
                 if (r && r.stack) document.getElementById('ref-balance').innerText = TonWeb.utils.fromNano(r.stack[0][1]);
-            } catch (e) { console.error("Balance Check Error", e); }
+            } catch (e) {}
         }
-        
-        setInterval(updateBalances, 15000);
+        setInterval(updateBalances, 8000);
 
         async function sendClaim(text) {
             if (!tonConnectUI.connected) return;
